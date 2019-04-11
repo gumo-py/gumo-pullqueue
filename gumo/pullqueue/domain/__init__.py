@@ -54,3 +54,7 @@ class GumoPullTask:
     task: PullTask
     state: PullTaskState
     logs: List[PullTaskLog]
+
+    @property
+    def key(self) -> EntityKey:
+        return self.task.key
