@@ -1,0 +1,43 @@
+import json
+import datetime
+
+from gumo.core.injector import injector
+from gumo.pullqueue.infrastructure.mapper import DatastoreGumoPullTaskMapper
+
+from gumo.pullqueue.domain import GumoPullTask
+from gumo.pullqueue.domain import PullTask
+from gumo.pullqueue.domain import PullTaskState
+
+from gumo.core import EntityKeyFactory
+
+
+def build_sample_pull_task():
+    return GumoPullTask(
+        task=PullTask(
+            key=EntityKeyFactory().build_for_new(kind=GumoPullTask.KIND),
+            payload={'key': 'value'},
+            schedule_time=datetime.datetime(2019, 1, 1)
+        ),
+        state=PullTaskState(),
+        logs=[],
+    )
+
+
+def test_pull_task_mapper_to_datastore():
+    mapper = injector.get(DatastoreGumoPullTaskMapper)  # type: DatastoreGumoPullTaskMapper
+    pulltask = build_sample_pull_task()
+
+    doc = mapper.to_datastore_entity(pulltask=pulltask)
+    assert doc['payload'] == json.dumps({'key': 'value'})
+    assert doc['schedule_time'] == pulltask.task.schedule_time
+    assert doc['retry_count'] == pulltask.state.retry_count
+    assert 'leased_by.address' not in doc
+
+
+def test_pull_task_mapper_to_entity():
+    mapper = injector.get(DatastoreGumoPullTaskMapper)  # type: DatastoreGumoPullTaskMapper
+    pulltask = build_sample_pull_task()
+    doc = mapper.to_datastore_entity(pulltask=pulltask)
+
+    entity = mapper.to_entity(key=pulltask.task.key, doc=doc)
+    assert entity == pulltask
