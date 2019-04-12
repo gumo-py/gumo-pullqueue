@@ -9,4 +9,4 @@ def test_enqueue():
         tag='sample-tag'
     )
 
-    assert t == None
+    assert t is None
