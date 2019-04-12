@@ -15,19 +15,19 @@ def enqueue(
         queue_name: Optional[str] = None,
         tag: Optional[str] = None,
 ) -> PullTask:
-   if queue_name is None:
-       config = injector.get(PullQueueConfiguration)  # type: PullQueueConfiguration
-       queue_name = config.default_queue_name
+    if queue_name is None:
+        config = injector.get(PullQueueConfiguration)  # type: PullQueueConfiguration
+        queue_name = config.default_queue_name
 
-   pulltask = GumoPullTaskFactory().build(
-       payload=payload,
-       schedule_time=schedule_time,
-       in_seconds=in_seconds,
-       queue_name=queue_name,
-       tag=tag,
-   )
+    pulltask = GumoPullTaskFactory().build(
+        payload=payload,
+        schedule_time=schedule_time,
+        in_seconds=in_seconds,
+        queue_name=queue_name,
+        tag=tag,
+    )
 
-   repository = injector.get(GumoPullTaskRepository)  # type: GumoPullTaskRepository
-   repository.save(pulltask=pulltask)
+    repository = injector.get(GumoPullTaskRepository)  # type: GumoPullTaskRepository
+    repository.save(pulltask=pulltask)
 
-   return pulltask.task
+    return pulltask.task
