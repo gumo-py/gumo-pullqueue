@@ -34,4 +34,3 @@ def configure(
     injector.binder.install(pullqueue_bind)
 
     return config
-
