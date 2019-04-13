@@ -3,6 +3,7 @@ import datetime
 
 from gumo.core.injector import injector
 from gumo.pullqueue.infrastructure.mapper import DatastoreGumoPullTaskMapper
+from gumo.datastore.infrastructure import DatastoreRepositoryMixin
 
 from gumo.pullqueue.domain import GumoPullTask
 from gumo.pullqueue.domain import PullTask
@@ -37,7 +38,12 @@ def test_pull_task_mapper_to_datastore():
 def test_pull_task_mapper_to_entity():
     mapper = injector.get(DatastoreGumoPullTaskMapper)  # type: DatastoreGumoPullTaskMapper
     pulltask = build_sample_pull_task()
-    doc = mapper.to_datastore_entity(pulltask=pulltask)
 
-    entity = mapper.to_entity(key=pulltask.task.key, doc=doc)
+    doc = mapper.to_datastore_entity(pulltask=pulltask)
+    datastore_entity = DatastoreRepositoryMixin.DatastoreEntity(
+        key=DatastoreRepositoryMixin().entity_key_mapper.to_datastore_key(entity_key=pulltask.key)
+    )
+    datastore_entity.update(doc)
+
+    entity = mapper.to_entity(doc=datastore_entity)
     assert entity == pulltask

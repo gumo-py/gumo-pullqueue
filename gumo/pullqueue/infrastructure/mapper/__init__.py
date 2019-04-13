@@ -71,13 +71,18 @@ class DatastoreGumoPullTaskMapper:
         else:
             leased_by = None
 
+        if doc.get('lease_expires_at') == self.DEFAULT_LEASE_EXPIRES_AT:
+            lease_expires_at = None
+        else:
+            lease_expires_at = doc.get('lease_expires_at')
+
         state = PullTaskState(
             execution_count=doc.get('execution_count'),
             retry_count=doc.get('retry_count'),
             last_executed_at=doc.get('last_executed_at'),
             next_executed_at=doc.get('next_executed_at'),
             leased_at=doc.get('leased_at'),
-            lease_expires_at=doc.get('lease_expires_at'),
+            lease_expires_at=lease_expires_at,
             leased_by=leased_by
         )
 
