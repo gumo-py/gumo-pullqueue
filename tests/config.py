@@ -9,16 +9,22 @@ if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') is None:
 
 
 core_configure(
-    google_cloud_project='gumo-sample',
+    google_cloud_project='gumo-pullqueue',
     google_cloud_location='asia-northeast1',
 )
 
+use_local_emulator = True
+datastore_emulator_host = 'localhost:8081'
+
 datastore_configure(
-    use_local_emulator=True,
-    emulator_host='datastore_emulator:8081',
+    use_local_emulator=use_local_emulator,
+    emulator_host=datastore_emulator_host,
     namespace=None,
 )
 
 pullqueue_configure(
     default_queue_name='pullqueue'
 )
+
+if use_local_emulator:
+    os.environ['DATASTORE_EMULATOR_HOST'] = datastore_emulator_host

@@ -47,3 +47,7 @@ pip-compile:
 test: build
 	pip3 install dist/${package_name}*.tar.gz
 	pytest -v tests/config.py tests
+
+.PHONY: datastore-emulator
+datastore-emulator:
+	docker-compose run --rm --service-ports datastore_emulator
