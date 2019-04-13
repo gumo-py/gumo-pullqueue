@@ -50,8 +50,7 @@ test: build
 
 .PHONY: datastore-emulator
 datastore-emulator:
-	docker-compose run --rm --service-ports datastore_emulator
-
+	docker-compose up
 
 .PHONY: server
 server:

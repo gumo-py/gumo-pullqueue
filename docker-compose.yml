@@ -2,10 +2,27 @@ version: '2.1'
 
 services:
   datastore_emulator:
-    image: singularities/datastore-emulator
+    image: quay.io/gumo/datastore-emulator:v241
+    volumes:
+      - datastore-emulator-storage:/opt/data
+      - ./sample:/sample
     environment:
       DATASTORE_PROJECT_ID: gumo-pullqueue
       DATASTORE_LISTEN_ADDRESS: 0.0.0.0:8081
     ports:
       - "8081:8081"
+
+  datastore_emulator_test:
+    image: quay.io/gumo/datastore-emulator:v241
+    volumes:
+      - ./sample:/sample
+    environment:
+      DATASTORE_PROJECT_ID: gumo-pullqueue
+      DATASTORE_LISTEN_ADDRESS: 0.0.0.0:8082
+    ports:
+      - "8082:8082"
     command: --no-store-on-disk --consistency=1
+
+volumes:
+  datastore-emulator-storage:
+    driver: local
