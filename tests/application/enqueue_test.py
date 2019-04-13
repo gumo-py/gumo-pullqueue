@@ -1,4 +1,5 @@
 from gumo.pullqueue.application import enqueue
+from gumo.pullqueue.domain import PullTask
 
 
 def test_enqueue():
@@ -9,4 +10,7 @@ def test_enqueue():
         tag='sample-tag'
     )
 
-    assert t is None
+    assert isinstance(t, PullTask)
+    assert t.queue_name == 'changed-pullqueue'
+    assert t.payload == {'key': 'value'}
+    assert t.tag == 'sample-tag'
