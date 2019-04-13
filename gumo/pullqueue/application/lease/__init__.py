@@ -1,3 +1,4 @@
+from logging import getLogger
 from injector import inject
 from typing import Optional
 from typing import List
@@ -6,6 +7,8 @@ from gumo.core import EntityKey
 
 from gumo.pullqueue.application.repository import GumoPullTaskRepository
 from gumo.pullqueue.domain import PullTask
+
+logger = getLogger(__name__)
 
 
 class LeaseTasksService:
@@ -23,6 +26,8 @@ class LeaseTasksService:
             tag: Optional[str] = None
     ) -> List[PullTask]:
         tasks = self._repository.fetch_available_tasks(size=lease_size)
+        for task in tasks:
+            logger.debug(task)
 
         # TODO: Update GumoPullTask for lease.
         lease_tasks = [task.task for task in tasks]

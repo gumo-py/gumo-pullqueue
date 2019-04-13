@@ -51,3 +51,8 @@ test: build
 .PHONY: datastore-emulator
 datastore-emulator:
 	docker-compose run --rm --service-ports datastore_emulator
+
+
+.PHONY: server
+server:
+	PYTHONPATH=. python sample/server.py

@@ -1,2 +1,4 @@
 gumo-core
 gumo-datastore
+Flask>=1.0.2
+flasgger>=0.9.1

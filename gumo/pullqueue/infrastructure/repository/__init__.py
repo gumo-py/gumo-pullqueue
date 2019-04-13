@@ -36,7 +36,7 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
         now = datetime.datetime.utcnow().replace(microsecond=0)
         query = self.datastore_client.query(kind=GumoPullTask.KIND)
         query.add_filter('schedule_time', '<=', now)
-        query.add_filter('lease_expires_at', '<=', now)
+        # query.add_filter('lease_expires_at', '<=', now)
         query.order = ['schedule_time']
 
         tasks = []
