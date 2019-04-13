@@ -14,7 +14,7 @@ core_configure(
 )
 
 use_local_emulator = True
-datastore_emulator_host = 'localhost:8081'
+datastore_emulator_host = 'localhost:8082'
 
 datastore_configure(
     use_local_emulator=use_local_emulator,
