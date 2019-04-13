@@ -1,4 +1,4 @@
-from gumo.pullqueue.application import enqueue
+from gumo.pullqueue.application.enqueue import enqueue
 from gumo.pullqueue.domain import PullTask
 
 

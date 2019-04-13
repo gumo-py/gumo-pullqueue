@@ -3,7 +3,7 @@ from logging import getLogger
 from injector import inject
 
 from gumo.datastore.infrastructure import DatastoreRepositoryMixin
-from gumo.pullqueue.application.repository import GumoPullTaskRepository
+from gumo.pullqueue.application.enqueue.repository import GumoPullTaskRepository
 from gumo.pullqueue.domain import GumoPullTask
 from gumo.pullqueue.infrastructure.mapper import DatastoreGumoPullTaskMapper
 
