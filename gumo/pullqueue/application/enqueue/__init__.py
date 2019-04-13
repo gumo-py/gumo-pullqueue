@@ -5,7 +5,7 @@ from gumo.core.injector import injector
 
 from gumo.pullqueue.domain.configuration import PullQueueConfiguration
 from gumo.pullqueue.application.enqueue.factory import GumoPullTaskFactory
-from gumo.pullqueue.application.enqueue.repository import GumoPullTaskRepository
+from gumo.pullqueue.application.repository import GumoPullTaskRepository
 from gumo.pullqueue.domain import PullTask
 
 
