@@ -1,5 +1,6 @@
 import dataclasses
 import datetime
+import enum
 from typing import Optional
 from typing import List
 
@@ -25,8 +26,23 @@ class PullTaskWorker:
     name: str
 
 
+class PullTaskStatus(enum.Enum):
+    initial = 'initial'
+    available = 'available'
+    leased = 'leased'
+    deleted = 'deleted'
+
+    @classmethod
+    def get(cls, name: str):
+        try:
+            return cls(name)
+        except ValueError:
+            return cls.initial
+
+
 @dataclasses.dataclass(frozen=True)
 class PullTaskState:
+    status: PullTaskStatus = PullTaskStatus.initial
     execution_count: int = 0
     retry_count: int = 0
     last_executed_at: Optional[datetime.datetime] = None

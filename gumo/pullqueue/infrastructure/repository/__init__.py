@@ -6,6 +6,7 @@ from injector import inject
 from gumo.datastore.infrastructure import DatastoreRepositoryMixin
 from gumo.pullqueue.application.repository import GumoPullTaskRepository
 from gumo.pullqueue.domain import GumoPullTask
+from gumo.pullqueue.domain import PullTaskStatus
 from gumo.pullqueue.infrastructure.mapper import DatastoreGumoPullTaskMapper
 
 logger = getLogger(__name__)
@@ -35,8 +36,8 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
     ) -> List[GumoPullTask]:
         now = datetime.datetime.utcnow().replace(microsecond=0)
         query = self.datastore_client.query(kind=GumoPullTask.KIND)
+        query.add_filter('state_name', '=', PullTaskStatus.available.name)
         query.add_filter('schedule_time', '<=', now)
-        # query.add_filter('lease_expires_at', '<=', now)
         query.order = ['schedule_time']
 
         tasks = []

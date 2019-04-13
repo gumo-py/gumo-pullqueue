@@ -9,6 +9,7 @@ from gumo.pullqueue.domain import GumoPullTask
 from gumo.pullqueue.domain import PullTask
 from gumo.pullqueue.domain import PullTaskState
 from gumo.pullqueue.domain import PullTaskWorker
+from gumo.pullqueue.domain import PullTaskStatus
 
 
 class DatastoreGumoPullTaskMapper:
@@ -30,7 +31,8 @@ class DatastoreGumoPullTaskMapper:
             'queue_name': pulltask.task.queue_name,
             'tag': pulltask.task.tag,
 
-            # pulltask.state
+            # pulltask.status
+            'status_name': pulltask.state.status.name,
             'execution_count': pulltask.state.execution_count,
             'retry_count': pulltask.state.retry_count,
             'last_executed_at': pulltask.state.last_executed_at,
@@ -77,6 +79,7 @@ class DatastoreGumoPullTaskMapper:
             lease_expires_at = doc.get('lease_expires_at')
 
         state = PullTaskState(
+            status=PullTaskStatus.get(doc.get('status_name')),
             execution_count=doc.get('execution_count'),
             retry_count=doc.get('retry_count'),
             last_executed_at=doc.get('last_executed_at'),
