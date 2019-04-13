@@ -1,5 +1,6 @@
+import datetime
 from logging import getLogger
-
+from typing import List
 from injector import inject
 
 from gumo.datastore.infrastructure import DatastoreRepositoryMixin
@@ -27,3 +28,21 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
         datastore_entity = self.DatastoreEntity(key=datastore_key)
         datastore_entity.update(self._pulltask_mapper.to_datastore_entity(pulltask=pulltask))
         self.datastore_client.put(datastore_entity)
+
+    def fetch_available_tasks(
+            self,
+            size: int = 100,
+    ) -> List[GumoPullTask]:
+        now = datetime.datetime.utcnow().replace(microsecond=0)
+        query = self.datastore_client.query(kind=GumoPullTask.KIND)
+        query.add_filter('schedule_time', '<=', now)
+        query.add_filter('lease_expires_at', '<=', now)
+        query.order = ['schedule_time']
+
+        tasks = []
+        for datastore_entity in query.fetch(limit=size):
+            tasks.append(
+                self._pulltask_mapper.to_entity(doc=datastore_entity)
+            )
+
+        return tasks

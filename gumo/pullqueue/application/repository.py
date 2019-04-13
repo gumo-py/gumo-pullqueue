@@ -1,4 +1,5 @@
 from injector import inject
+from typing import List
 
 from gumo.core import GumoConfiguration
 from gumo.datastore.domain.configuration import DatastoreConfiguration
@@ -22,4 +23,16 @@ class GumoPullTaskRepository:
             self,
             pulltask: GumoPullTask
     ):
+        raise NotImplementedError()
+
+    def multi_save(
+            self,
+            tasks: List[GumoPullTask],
+    ):
+        raise NotImplementedError()
+
+    def fetch_available_tasks(
+            self,
+            size: int = 100,
+    ) -> List[GumoPullTask]:
         raise NotImplementedError()

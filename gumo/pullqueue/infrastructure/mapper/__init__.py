@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from injector import inject
 
@@ -11,6 +12,8 @@ from gumo.pullqueue.domain import PullTaskWorker
 
 
 class DatastoreGumoPullTaskMapper:
+    DEFAULT_LEASE_EXPIRES_AT = datetime.datetime(2000, 1, 1)
+
     @inject
     def __init__(
             self,
@@ -33,8 +36,12 @@ class DatastoreGumoPullTaskMapper:
             'last_executed_at': pulltask.state.last_executed_at,
             'next_executed_at': pulltask.state.next_executed_at,
             'leased_at': pulltask.state.leased_at,
-            'lease_expires_at': pulltask.state.lease_expires_at,
         }
+
+        if pulltask.state.lease_expires_at:
+            j['lease_expires_at'] = pulltask.state.lease_expires_at
+        else:
+            j['lease_expires_at'] = self.DEFAULT_LEASE_EXPIRES_AT
 
         if pulltask.state.leased_by:
             j.update({
@@ -44,7 +51,9 @@ class DatastoreGumoPullTaskMapper:
 
         return j
 
-    def to_entity(self, key: EntityKey, doc: dict) -> GumoPullTask:
+    def to_entity(self, doc: dict) -> GumoPullTask:
+        key = self._entity_key_mapper.to_entity_key(datastore_key=doc.key)
+
         task = PullTask(
             key=key,
             payload=json.loads(doc.get('payload')),
