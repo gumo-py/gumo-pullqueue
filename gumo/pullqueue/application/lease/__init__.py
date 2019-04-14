@@ -26,8 +26,6 @@ class LeaseTasksService:
             tag: Optional[str] = None
     ) -> List[PullTask]:
         tasks = self._repository.fetch_available_tasks(size=lease_size)
-        for task in tasks:
-            logger.debug(task)
 
         # TODO: Update GumoPullTask for lease.
         lease_tasks = [task.task for task in tasks]

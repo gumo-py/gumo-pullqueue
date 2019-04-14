@@ -36,14 +36,13 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
     ) -> List[GumoPullTask]:
         now = datetime.datetime.utcnow().replace(microsecond=0)
         query = self.datastore_client.query(kind=GumoPullTask.KIND)
-        query.add_filter('state_name', '=', PullTaskStatus.available.name)
+        query.add_filter('status_name', '=', PullTaskStatus.initial.name)
         query.add_filter('schedule_time', '<=', now)
         query.order = ['schedule_time']
 
         tasks = []
         for datastore_entity in query.fetch(limit=size):
-            tasks.append(
-                self._pulltask_mapper.to_entity(doc=datastore_entity)
-            )
+            task = self._pulltask_mapper.to_entity(doc=datastore_entity)
+            tasks.append(task)
 
         return tasks
