@@ -29,6 +29,9 @@ core_configure(
     google_cloud_project=os.environ.get('PROJECT_NAME'),
     google_cloud_location=os.environ.get('PROJECT_LOCATION'),
 )
+
+os.environ['DATASTORE_EMULATOR_HOST'] = 'localhost:8081'
+
 datastore_configure(
     use_local_emulator='DATASTORE_EMULATOR_HOST' in os.environ,
     emulator_host=os.environ.get('DATASTORE_EMULATOR_HOST'),
