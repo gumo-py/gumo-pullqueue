@@ -1,57 +1,37 @@
 package_name = gumo-pullqueue
 
-export PATH := venv/bin:$(shell echo ${PATH})
-
-.PHONY: setup
-setup:
-	[ -d venv ] || python3 -m venv venv
-	pip3 install twine wheel pytest
-	pip3 install -r requirements.txt
-
-.PHONY: deploy
-deploy: clean build
-	python3 -m twine upload \
-		--repository-url https://upload.pypi.org/legacy/ \
-		dist/*
-
-.PHONY: test-deploy
-test-deploy: clean build
-	python3 -m twine upload \
-		--repository-url https://test.pypi.org/legacy/ \
-		dist/*
-
-.PHONY: test-install
-test-install:
-	pip3 --no-cache-dir install --upgrade \
-		-i https://test.pypi.org/simple/ \
-		${package_name}
-
-.PHONY: build
-build: pip-compile
-	python3 setup.py sdist bdist_wheel
-
-.PHONY: clean
-clean:
-	rm -rf $(subst -,_,${package_name}).egg-info dist build
-
-.PHONY: pip-compile
-pip-compile:
-	pip-compile \
-		--upgrade-package gumo-core \
-		--upgrade-package gumo-datastore \
-		--output-file requirements.txt \
-		requirements.in
-	pip3 install -r requirements.txt
-
 .PHONY: test
-test: build
-	pip3 install dist/${package_name}*.tar.gz
-	pytest -v tests/config.py tests
+test:
+	docker-compose run --rm server_test
 
-.PHONY: datastore-emulator
-datastore-emulator:
-	docker-compose up
+.PHONY: fasttest
+fasttest:
+	docker-compose run --rm server_test make -f tools/Makefile fasttest
 
 .PHONY: server
 server:
-	PYTHONPATH=. python sample/server.py
+	docker-compose run --rm --service-ports server
+
+.PHONY: build
+build:
+	docker-compose run --rm server make -f tools/Makefile build
+
+.PHONY: fastbuild
+fastbuild:
+	docker-compose run --rm server make -f tools/Makefile fastbuild
+
+.PHONY: test-deploy
+test-deploy:
+	docker-compose run --rm \
+		-e TWINE_USERNAME=${TWINE_USERNAME} \
+		-e TWINE_PASSWORD=${TWINE_PASSWORD} \
+		server \
+		make -f tools/Makefile test-deploy
+
+.PHONY: deploy
+deploy:
+	docker-compose run --rm \
+		-e TWINE_USERNAME=${TWINE_USERNAME} \
+		-e TWINE_PASSWORD=${TWINE_PASSWORD} \
+		server \
+		make -f tools/Makefile deploy
