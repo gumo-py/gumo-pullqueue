@@ -3,7 +3,6 @@ import datetime
 
 from injector import inject
 
-from gumo.core import EntityKey
 from gumo.datastore.infrastructure import EntityKeyMapper
 from gumo.pullqueue.domain import GumoPullTask
 from gumo.pullqueue.domain import PullTask
