@@ -49,7 +49,7 @@ pip-compile:
 .PHONY: fasttest
 fasttest: fastbuild
 	pip3 install dist/${package_name}*.tar.gz
-	pytest -v tests/config.py tests
+	pytest ${PYTEST_OPTIONS} -v tests/config.py tests
 
 .PHONY: test
 test: setup build fasttest

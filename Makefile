@@ -6,7 +6,10 @@ test:
 
 .PHONY: fasttest
 fasttest:
-	docker-compose run --rm server_test make -f tools/Makefile fasttest
+	docker-compose run --rm \
+		-e PYTEST_OPTIONS="--failed-first" \
+		server_test \
+		make -f tools/Makefile fasttest
 
 .PHONY: server
 server:
