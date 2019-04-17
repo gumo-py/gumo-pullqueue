@@ -21,15 +21,16 @@ class EnqueuePullTaskView(flask.views.MethodView):
 
 
 class LeasePullTasksView(flask.views.MethodView):
-    def get(self):
-        logger.info('call lease')
+    def get(self, queue_name: str):
         lease_service = injector.get(LeaseTasksService)  # type: LeaseTasksService
         tasks = lease_service.lease_tasks(
+            queue_name=queue_name,
             lease_time=3600,
             lease_size=100,
         )
 
-        return str(tasks)
+        return flask.jsonify([str(task) for task in tasks])
+
 
 
 pullqueue_blueprint.add_url_rule(
@@ -39,7 +40,7 @@ pullqueue_blueprint.add_url_rule(
 )
 
 pullqueue_blueprint.add_url_rule(
-    '/gumo/pullqueue/lease',
+    '/gumo/pullqueue/<queue_name>/lease',
     view_func=LeasePullTasksView.as_view(name='gumo/pulllqueue/lease'),
     methods=['GET']
 )
