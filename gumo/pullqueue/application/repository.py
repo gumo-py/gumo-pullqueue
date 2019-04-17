@@ -1,5 +1,7 @@
+import datetime
 from injector import inject
 from typing import List
+from typing import Optional
 
 from gumo.core import GumoConfiguration
 from gumo.datastore.domain.configuration import DatastoreConfiguration
@@ -33,7 +35,9 @@ class GumoPullTaskRepository:
 
     def fetch_available_tasks(
             self,
+            queue_name: str,
             size: int = 100,
+            now: Optional[datetime.datetime] = None,
     ) -> List[GumoPullTask]:
         raise NotImplementedError()
 

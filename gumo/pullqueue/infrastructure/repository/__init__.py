@@ -1,6 +1,7 @@
 import datetime
 from logging import getLogger
 from typing import List
+from typing import Optional
 from injector import inject
 
 from gumo.datastore.infrastructure import DatastoreRepositoryMixin
@@ -32,10 +33,14 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
 
     def fetch_available_tasks(
             self,
+            queue_name: str,
             size: int = 100,
+            now: Optional[datetime.datetime] = None,
     ) -> List[GumoPullTask]:
-        now = datetime.datetime.utcnow().replace(microsecond=0)
+        now = now if now else datetime.datetime.utcnow().replace(microsecond=0)
+
         query = self.datastore_client.query(kind=GumoPullTask.KIND)
+        query.add_filter('queue_name', '=', queue_name)
         query.add_filter('status_name', '=', PullTaskStatus.initial.name)
         query.add_filter('schedule_time', '<=', now)
         query.order = ['schedule_time']

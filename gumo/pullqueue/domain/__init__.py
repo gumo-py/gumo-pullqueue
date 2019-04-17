@@ -19,6 +19,9 @@ class PullTask:
     queue_name: Optional[str] = None
     tag: Optional[str] = None
 
+    def __eq__(self, other):
+        return isinstance(other, self.__class__) and self.key == other.key
+
 
 @dataclasses.dataclass(frozen=True)
 class PullTaskWorker:
