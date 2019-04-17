@@ -36,3 +36,6 @@ class GumoPullTaskRepository:
             size: int = 100,
     ) -> List[GumoPullTask]:
         raise NotImplementedError()
+
+    def total_count(self) -> int:
+        raise NotImplementedError()

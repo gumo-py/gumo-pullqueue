@@ -46,3 +46,8 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
             tasks.append(task)
 
         return tasks
+
+    def total_count(self) -> int:
+        query = self.datastore_client.query(kind=GumoPullTask.KIND)
+        query.keys_only()
+        return len(list(query.fetch()))
