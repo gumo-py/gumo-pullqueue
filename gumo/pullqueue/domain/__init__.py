@@ -54,6 +54,14 @@ class PullTaskState:
     lease_expires_at: Optional[datetime.datetime] = None
     leased_by: Optional[PullTaskWorker] = None
 
+    def _clone(self, **changes):
+        return dataclasses.replace(self, **changes)
+
+    def with_status(self, new_status: PullTaskStatus):
+        return self._clone(
+            status=new_status,
+        )
+
 
 @dataclasses.dataclass(frozen=True)
 class PullTaskLog:
@@ -77,3 +85,11 @@ class GumoPullTask:
     @property
     def key(self) -> EntityKey:
         return self.task.key
+
+    def _clone(self, **changes):
+        return dataclasses.replace(self, **changes)
+
+    def with_status(self, new_status: PullTaskStatus):
+        return self._clone(
+            state=self.state.with_status(new_status=new_status)
+        )

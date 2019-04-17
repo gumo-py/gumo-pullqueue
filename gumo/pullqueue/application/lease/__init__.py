@@ -4,9 +4,10 @@ from typing import Optional
 from typing import List
 
 from gumo.core import EntityKey
-
+from gumo.datastore import datastore_transaction
 from gumo.pullqueue.application.repository import GumoPullTaskRepository
 from gumo.pullqueue.domain import PullTask
+from gumo.pullqueue.domain import PullTaskStatus
 
 logger = getLogger(__name__)
 
@@ -45,8 +46,14 @@ class DeleteTasksService:
     ):
         self._repository = repository
 
+    @datastore_transaction()
     def delete_tasks(
             self,
             task_keys: List[EntityKey],
     ):
-        pass
+        tasks = self._repository.fetch_keys(keys=task_keys)
+        deleted_tasks = [
+            task.with_status(new_status=PullTaskStatus.deleted)
+            for task in tasks
+        ]
+        self._repository.put_multi(deleted_tasks)

@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 
 from gumo.core import GumoConfiguration
+from gumo.core import EntityKey
 from gumo.datastore.domain.configuration import DatastoreConfiguration
 from gumo.pullqueue.domain.configuration import PullQueueConfiguration
 from gumo.pullqueue.domain import GumoPullTask
@@ -45,4 +46,10 @@ class GumoPullTaskRepository:
         raise NotImplementedError()
 
     def purge(self):
+        raise NotImplementedError()
+
+    def fetch_keys(self, keys: List[EntityKey]) -> List[GumoPullTask]:
+        raise NotImplementedError()
+
+    def put_multi(self, tasks: List[GumoPullTask]):
         raise NotImplementedError()

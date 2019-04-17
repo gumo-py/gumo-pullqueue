@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 from injector import inject
 
+from gumo.core import EntityKey
 from gumo.datastore.infrastructure import DatastoreRepositoryMixin
 from gumo.pullqueue.application.repository import GumoPullTaskRepository
 from gumo.pullqueue.domain import GumoPullTask
@@ -62,3 +63,26 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
         query.keys_only()
         keys = [doc.key for doc in query.fetch()]
         self.datastore_client.delete_multi(keys)
+
+    def fetch_keys(self, keys: List[EntityKey]) -> List[GumoPullTask]:
+        datastore_keys = [
+            self.entity_key_mapper.to_datastore_key(entity_key=key) for key in keys
+        ]
+        datastore_entities = self.datastore_client.get_multi(keys=datastore_keys)
+
+        entities = [
+            self._pulltask_mapper.to_entity(doc=doc) for doc in datastore_entities
+        ]
+        return entities
+
+    def put_multi(self, tasks: List[GumoPullTask]):
+        datastore_entities = []
+        for pulltask in tasks:
+            datastore_key = self.entity_key_mapper.to_datastore_key(entity_key=pulltask.key)
+            datastore_entity = self.DatastoreEntity(key=datastore_key)
+            datastore_entity.update(
+                self._pulltask_mapper.to_datastore_entity(pulltask=pulltask)
+            )
+            datastore_entities.append(datastore_entity)
+
+        self.datastore_client.put_multi(datastore_entities)
