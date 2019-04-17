@@ -21,15 +21,19 @@ class LeaseTasksService:
 
     def lease_tasks(
             self,
+            queue_name: str,
             lease_time: int,
             lease_size: int,
             tag: Optional[str] = None
     ) -> List[PullTask]:
-        tasks = self._repository.fetch_available_tasks(size=lease_size)
+        tasks = self._repository.fetch_available_tasks(
+            queue_name=queue_name,
+            size=lease_size
+        )
 
-        # TODO: Update GumoPullTask for lease.
+        # TODO: Update GumoPullTask for lock and lease.
+
         lease_tasks = [task.task for task in tasks]
-
         return lease_tasks
 
 
