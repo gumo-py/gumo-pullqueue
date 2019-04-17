@@ -39,3 +39,6 @@ class GumoPullTaskRepository:
 
     def total_count(self) -> int:
         raise NotImplementedError()
+
+    def purge(self):
+        raise NotImplementedError()

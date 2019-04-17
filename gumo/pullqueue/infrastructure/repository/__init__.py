@@ -51,3 +51,9 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
         query = self.datastore_client.query(kind=GumoPullTask.KIND)
         query.keys_only()
         return len(list(query.fetch()))
+
+    def purge(self):
+        query = self.datastore_client.query(kind=GumoPullTask.KIND)
+        query.keys_only()
+        keys = [doc.key for doc in query.fetch()]
+        self.datastore_client.delete_multi(keys)

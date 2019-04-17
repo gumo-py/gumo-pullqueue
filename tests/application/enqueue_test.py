@@ -24,3 +24,6 @@ def test_enqueue():
     after = repo.total_count()
 
     assert before + 1 == after
+
+    repo.purge()
+    assert repo.total_count() == 0
