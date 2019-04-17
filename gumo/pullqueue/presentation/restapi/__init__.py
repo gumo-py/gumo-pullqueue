@@ -4,6 +4,7 @@ import flask.views
 from gumo.core.injector import injector
 from gumo.pullqueue.application.enqueue import enqueue
 from gumo.pullqueue.application.lease import LeaseTasksService
+from gumo.pullqueue.application.encoder import PullTaskJSONEncoder
 
 
 logger = getLogger(__name__)
@@ -17,7 +18,9 @@ class EnqueuePullTaskView(flask.views.MethodView):
             in_seconds=5
         )
 
-        return str(task)
+        return flask.jsonify(
+            PullTaskJSONEncoder(pulltask=task).to_json()
+        )
 
 
 class LeasePullTasksView(flask.views.MethodView):
@@ -29,7 +32,12 @@ class LeasePullTasksView(flask.views.MethodView):
             lease_size=100,
         )
 
-        return flask.jsonify([str(task) for task in tasks])
+        return flask.jsonify({
+            'tasks': [
+                PullTaskJSONEncoder(pulltask=task).to_json()
+                for task in tasks
+            ]
+        })
 
 
 
