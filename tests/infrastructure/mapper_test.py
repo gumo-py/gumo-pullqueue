@@ -16,6 +16,7 @@ def build_sample_pull_task():
     return GumoPullTask(
         task=PullTask(
             key=EntityKeyFactory().build_for_new(kind=GumoPullTask.KIND),
+            queue_name='pullqueue',
             payload={'key': 'value'},
             schedule_time=datetime.datetime(2019, 1, 1)
         ),
