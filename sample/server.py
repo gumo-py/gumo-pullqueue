@@ -7,8 +7,8 @@ import flask.views
 from gumo.core import MockAppEngineEnvironment
 from gumo.core import configure as core_configure
 from gumo.datastore import configure as datastore_configure
-from gumo.pullqueue import configure as pullqueue_configure
-from gumo.pullqueue.presentation.restapi import pullqueue_blueprint
+from gumo.pullqueue.server import configure as pullqueue_configure
+from gumo.pullqueue.server.presentation.restapi import pullqueue_blueprint
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)

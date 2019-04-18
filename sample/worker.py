@@ -3,7 +3,7 @@ import sys
 import logging
 
 from gumo.core import MockAppEngineEnvironment
-from gumo.pullqueue_worker import configure as pullqueue_worker_configure
+from gumo.pullqueue.worker import configure as pullqueue_worker_configure
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
