@@ -3,6 +3,7 @@ import os
 from gumo.core import configure as core_configure
 from gumo.datastore import configure as datastore_configure
 from gumo.pullqueue import configure as pullqueue_configure
+from gumo.pullqueue_worker import configure as pullqueue_worker_configure
 
 if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') is None:
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/path/to/credential.json'
@@ -24,4 +25,9 @@ datastore_configure(
 
 pullqueue_configure(
     default_queue_name='pullqueue'
+)
+
+pullqueue_worker_configure(
+    server_url='http://server:8080',
+    polling_sleep_seconds=0,
 )
