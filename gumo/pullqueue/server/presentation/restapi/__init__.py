@@ -42,13 +42,13 @@ class LeasePullTasksView(flask.views.MethodView):
 
 
 pullqueue_blueprint.add_url_rule(
-    '/gumo/server/enqueue',
+    '/gumo/pullqueue/enqueue',
     view_func=EnqueuePullTaskView.as_view(name='gumo/server/enqueue'),
     methods=['GET']
 )
 
 pullqueue_blueprint.add_url_rule(
-    '/gumo/server/<queue_name>/lease',
-    view_func=LeasePullTasksView.as_view(name='gumo/pulllqueue/lease'),
+    '/gumo/pullqueue/<queue_name>/lease',
+    view_func=LeasePullTasksView.as_view(name='gumo/pullqueue/lease'),
     methods=['GET']
 )
