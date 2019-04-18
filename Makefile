@@ -15,6 +15,10 @@ fasttest:
 server:
 	docker-compose run --rm --service-ports server
 
+.PHONY: worker
+worker:
+	docker-compose run --rm --service-ports worker
+
 .PHONY: build
 build:
 	docker-compose run --rm server make -f tools/Makefile build

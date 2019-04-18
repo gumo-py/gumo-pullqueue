@@ -34,6 +34,20 @@ services:
       USE_TASK_EMULATOR: "true"
     command: make -f tools/Makefile test
 
+  worker:
+    image: python:3.7.2-stretch
+    working_dir: /app
+    volumes:
+      - .:/app
+      - python-cache:/root/.cache/pip
+    depends_on:
+      - datastore_emulator
+      - server
+    environment:
+      DOCKER: "true"
+      GOOGLE_APPLICATION_CREDENTIALS: "/app/credentials/service-account-development.json"
+    command: make -f tools/Makefile worker
+
   datastore_emulator:
     image: quay.io/gumo/datastore-emulator:v241
     volumes:

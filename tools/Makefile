@@ -57,3 +57,7 @@ test: setup build fasttest
 .PHONY: server
 server: setup
 	PYTHONPATH=. python sample/server.py
+
+.PHONY: worker
+worker: setup
+	PYTHONPATH=. python sample/worker.py
