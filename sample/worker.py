@@ -3,7 +3,9 @@ import sys
 import logging
 
 from gumo.core import MockAppEngineEnvironment
+from gumo.core.injector import injector
 from gumo.pullqueue.worker import configure as pullqueue_worker_configure
+from gumo.pullqueue.worker.application import LeaseTasksService
 
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
@@ -23,3 +25,13 @@ if __name__ == '__main__' or 'PYTEST' in os.environ:
 pullqueue_worker_configure(
     server_url='http://server:8080',
 )
+
+if __name__ == '__main__':
+    service = injector.get(LeaseTasksService)  # type: LeaseTasksService
+    tasks = service.lease_tasks(
+        queue_name='pullqueue',
+        lease_time=3600,
+        lease_size=10,
+    )
+
+    print(tasks)

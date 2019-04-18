@@ -1,3 +1,5 @@
+from injector import inject
+
 from logging import getLogger
 from typing import List
 
@@ -9,6 +11,7 @@ logger = getLogger(__name__)
 
 
 class PullTaskRemoteRepository:
+    @inject
     def __init__(
             self,
             configuration: PullQueueWorkerConfiguration,
