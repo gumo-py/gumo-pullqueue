@@ -46,5 +46,17 @@ class DeleteTasksService:
             self,
             tasks: List[PullTask],
     ):
+        if len(tasks) == 0:
+            logger.debug(f'delete_tasks called with empty lists.')
+            return
+
+        queue_names = list(set([task.queue_name for task in tasks]))
+        if len(queue_names) > 1:
+            raise ValueError(f'A mix of tasks from different queues: {queue_names}')
+
+        queue_name = queue_names[0]
         keys = [task.key for task in tasks]
-        self._repository.delete_tasks(keys=keys)
+        self._repository.delete_tasks(
+            queue_name=queue_name,
+            keys=keys,
+        )

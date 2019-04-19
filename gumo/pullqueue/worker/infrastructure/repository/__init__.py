@@ -3,8 +3,10 @@ import datetime
 from logging import getLogger
 from urllib.parse import urljoin
 from typing import List
+from typing import Optional
 
 from gumo.core import EntityKeyFactory
+from gumo.core import EntityKey
 from gumo.pullqueue import PullTask
 from gumo.pullqueue.worker.application.repository import PullTaskRemoteRepository
 
@@ -33,12 +35,21 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
     def _server_url(self) -> str:
         return self._configuration.server_url
 
-    def _requests(self, method, path) -> dict:
+    def _requests(
+            self,
+            method: str,
+            path: str,
+            json: Optional[dict] = None,
+    ) -> dict:
         url = urljoin(
             base=self._server_url(),
             url=path,
         )
-        response = requests.request(method=method, url=url)
+        response = requests.request(
+            method=method,
+            url=url,
+            json=json,
+        )
         return response.json()
 
     def lease_tasks(
@@ -56,3 +67,16 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
         ]
 
         return tasks
+
+    def delete_tasks(
+            self,
+            queue_name: str,
+            keys: List[EntityKey],
+    ):
+        self._requests(
+            method='DELETE',
+            path=f'/gumo/pullqueue/{queue_name}/delete',
+            json={
+                'keys': [key.key_path() for key in keys]
+            }
+        )

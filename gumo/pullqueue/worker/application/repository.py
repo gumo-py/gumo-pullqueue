@@ -27,6 +27,7 @@ class PullTaskRemoteRepository:
 
     def delete_tasks(
             self,
+            queue_name: str,
             keys: List[EntityKey],
     ):
         raise NotImplementedError()
