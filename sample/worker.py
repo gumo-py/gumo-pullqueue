@@ -6,6 +6,7 @@ from gumo.core import MockAppEngineEnvironment
 from gumo.core.injector import injector
 from gumo.pullqueue.worker import configure as pullqueue_worker_configure
 from gumo.pullqueue.worker.application.service import LeaseTasksService
+from gumo.pullqueue.worker.application.service import DeleteTasksService
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -26,11 +27,21 @@ pullqueue_worker_configure(
 )
 
 if __name__ == '__main__':
-    service = injector.get(LeaseTasksService)  # type: LeaseTasksService
-    tasks = service.lease_tasks(
-        queue_name='pullqueue',
-        lease_time=3600,
-        lease_size=10,
-    )
+    import time
 
-    print(tasks)
+    lease_service = injector.get(LeaseTasksService)  # type: LeaseTasksService
+    delete_service = injector.get(DeleteTasksService)  # type: DeleteTasksService
+
+    while True:
+        tasks = lease_service.lease_tasks(
+            queue_name='pullqueue',
+            lease_time=3600,
+            lease_size=1,
+        )
+
+        if len(tasks) > 0:
+            print(tasks)
+            delete_service.delete_tasks(tasks=tasks)
+            time.sleep(3)
+        else:
+            time.sleep(10)
