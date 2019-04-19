@@ -6,7 +6,7 @@ from typing import List
 
 from gumo.core import EntityKeyFactory
 from gumo.pullqueue import PullTask
-from gumo.pullqueue.worker.application import PullTaskRemoteRepository
+from gumo.pullqueue.worker.application.repository import PullTaskRemoteRepository
 
 logger = getLogger(__name__)
 

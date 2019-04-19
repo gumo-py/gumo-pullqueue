@@ -5,8 +5,7 @@ import logging
 from gumo.core import MockAppEngineEnvironment
 from gumo.core.injector import injector
 from gumo.pullqueue.worker import configure as pullqueue_worker_configure
-from gumo.pullqueue.worker.application import LeaseTasksService
-
+from gumo.pullqueue.worker.application.service import LeaseTasksService
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)

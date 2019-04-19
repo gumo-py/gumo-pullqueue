@@ -1,6 +1,6 @@
 from gumo.core.injector import injector
 
-from gumo.pullqueue.worker.application import LeaseTasksService
+from gumo.pullqueue.worker.application.service import LeaseTasksService
 
 
 def test_lease_service():
