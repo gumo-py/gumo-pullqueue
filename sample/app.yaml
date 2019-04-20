@@ -1,0 +1,6 @@
+runtime: python37
+service: default
+
+env_variables:
+  PROJECT_NAME: gumo-example
+  PROJECT_LOCATION: us-central1
