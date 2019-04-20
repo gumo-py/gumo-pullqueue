@@ -1,5 +1,6 @@
 import requests
 import json
+import uuid
 from logging import getLogger
 from urllib.parse import urljoin
 from typing import List
@@ -14,6 +15,30 @@ logger = getLogger(__name__)
 
 
 class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
+    @property
+    def _request_log_enabled(self):
+        return self._configuration.request_logger is not None
+
+    @property
+    def _logger(self):
+        return self._configuration.request_logger
+
+    def _log_request(self, request_id, method, url, data, headers):
+        if not self._request_log_enabled:
+            return
+
+        self._logger.debug(
+            f'[HttpRequestPullTaskRepo] request_id={request_id} {method} {url} (data={data}, headers={headers})'
+        )
+
+    def _log_response(self, request_id, response):
+        if not self._request_log_enabled:
+            return
+
+        self._logger.debug(
+            f'[HttpRequestPullTaskRepo] request_id={request_id} {response}'
+        )
+
     def _server_url(self) -> str:
         return self._configuration.server_url
 
@@ -32,14 +57,33 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
         if payload is not None:
             data = json.dumps(payload)
 
+        request_id = str(uuid.uuid4())
+        headers = {
+            'Content-Type': 'application/json',
+            'X-Worker-Request-ID': request_id,
+        }
+
+        if self._request_log_enabled:
+            self._log_request(
+                request_id=request_id,
+                method=method,
+                url=url,
+                data=data,
+                headers=headers
+            )
+
         response = requests.request(
             method=method,
             url=url,
             data=data,
-            headers={
-                'Content-Type': 'application/json',
-            }
+            headers=headers
         )
+
+        if self._request_log_enabled:
+            self._log_response(
+                request_id=request_id,
+                response=response,
+            )
 
         if response.headers.get('Content-Type') == 'application/json':
             return response.json()
