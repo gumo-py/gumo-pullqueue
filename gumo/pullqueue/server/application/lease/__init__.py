@@ -49,9 +49,21 @@ class DeleteTasksService:
     @datastore_transaction()
     def delete_tasks(
             self,
+            queue_name: str,
             task_keys: List[EntityKey],
     ):
         tasks = self._repository.fetch_keys(keys=task_keys)
+
+        not_found_tasks = [t for t in tasks if t is None]
+        if len(not_found_tasks) > 0:
+            raise ValueError(f'Some tasks does not found.')
+
+        other_queued_tasks = [task for task in tasks if task.task.queue_name != queue_name]
+        if len(other_queued_tasks) > 0:
+            raise ValueError(
+                f'Some tasks belong to other queues. (target={queue_name}, other_queue_names={other_queued_tasks})'
+            )
+
         deleted_tasks = [
             task.with_status(new_status=PullTaskStatus.deleted)
             for task in tasks
