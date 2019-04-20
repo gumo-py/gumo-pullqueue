@@ -45,7 +45,10 @@ def test_delete_tasks_service():
         lease_size=100
     )) == 1
 
-    delete_service.delete_tasks([task.key])
+    delete_service.delete_tasks(
+        queue_name='server',
+        task_keys=[task.key],
+    )
 
     assert len(lease_service.lease_tasks(
         queue_name='server',
