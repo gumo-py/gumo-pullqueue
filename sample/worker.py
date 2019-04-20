@@ -45,9 +45,7 @@ if __name__ == '__main__':
             print('#####')
             print(task.payload)
             print('#####')
-            delete_service.delete_tasks(tasks=tasks)
-            # time.sleep(1)
+            delete_service.delete_tasks(tasks=[task])
+            time.sleep(1)
         else:
             time.sleep(10)
-
-        break
