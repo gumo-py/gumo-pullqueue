@@ -5,22 +5,7 @@ from typing import Optional
 from typing import List
 
 from gumo.core import EntityKey
-
-
-@dataclasses.dataclass(frozen=True)
-class PullTask:
-    """
-    Task payload to process at enqueue time and lease time
-    """
-    key: EntityKey
-    queue_name: str
-    payload: Optional[dict] = dataclasses.field(default_factory=dict)
-    schedule_time: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.utcnow)
-    created_at: datetime.datetime = dataclasses.field(default_factory=datetime.datetime.utcnow)
-    tag: Optional[str] = None
-
-    def __eq__(self, other):
-        return isinstance(other, self.__class__) and self.key == other.key
+from gumo.pullqueue.domain import PullTask
 
 
 @dataclasses.dataclass(frozen=True)

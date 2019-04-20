@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from gumo.pullqueue.server.domain import PullTask
+from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import PullTaskState
 from gumo.pullqueue.server.domain import GumoPullTask
 

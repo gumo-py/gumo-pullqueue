@@ -2,7 +2,7 @@ from gumo.core.injector import injector
 
 from gumo.pullqueue.server.application.enqueue import enqueue
 from gumo.pullqueue.server.application.repository import GumoPullTaskRepository
-from gumo.pullqueue.server.domain import PullTask
+from gumo.pullqueue import PullTask
 
 
 def test_enqueue():

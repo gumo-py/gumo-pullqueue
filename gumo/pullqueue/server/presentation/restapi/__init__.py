@@ -6,8 +6,7 @@ from gumo.core import EntityKeyFactory
 from gumo.pullqueue.server.application.enqueue import enqueue
 from gumo.pullqueue.server.application.lease import LeaseTasksService
 from gumo.pullqueue.server.application.lease import DeleteTasksService
-from gumo.pullqueue.server.application.encoder import PullTaskJSONEncoder
-
+from gumo.pullqueue.domain import PullTaskJSONEncoder
 
 logger = getLogger(__name__)
 pullqueue_blueprint = flask.Blueprint('server', __name__)

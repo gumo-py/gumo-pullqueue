@@ -6,7 +6,7 @@ from gumo.pullqueue.server.infrastructure.mapper import DatastoreGumoPullTaskMap
 from gumo.datastore.infrastructure import DatastoreRepositoryMixin
 
 from gumo.pullqueue.server.domain import GumoPullTask
-from gumo.pullqueue.server.domain import PullTask
+from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import PullTaskState
 
 from gumo.core import EntityKeyFactory
