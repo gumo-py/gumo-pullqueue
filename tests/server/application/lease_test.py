@@ -30,7 +30,7 @@ def test_lease_tasks_service():
 def test_delete_tasks_service():
     repo = injector.get(GumoPullTaskRepository)  # type: GumoPullTaskRepository
     lease_service = injector.get(LeaseTasksService)  # type: LeaseTasksService
-    delete_service = injector.get(DeleteTasksService)  # type: DeleteTasksServserviceice
+    delete_service = injector.get(DeleteTasksService)  # type: DeleteTasksService
 
     repo.purge()
 
