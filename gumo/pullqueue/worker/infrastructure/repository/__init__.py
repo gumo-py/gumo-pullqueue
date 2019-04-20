@@ -1,9 +1,11 @@
 import requests
 import datetime
+import json
 from logging import getLogger
 from urllib.parse import urljoin
 from typing import List
 from typing import Optional
+from typing import Union
 
 from gumo.core import EntityKeyFactory
 from gumo.core import EntityKey
@@ -39,18 +41,30 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
             self,
             method: str,
             path: str,
-            json: Optional[dict] = None,
-    ) -> dict:
+            payload: Optional[dict] = None,
+    ) -> Union[dict, str]:
         url = urljoin(
             base=self._server_url(),
             url=path,
         )
+
+        data = None
+        if payload is not None:
+            data = json.dumps(payload)
+
         response = requests.request(
             method=method,
             url=url,
-            json=json,
+            data=data,
+            headers={
+                'Content-Type': 'application/json',
+            }
         )
-        return response.json()
+
+        if response.headers.get('Content-Type') == 'application/json':
+            return response.json()
+        else:
+            return response.content
 
     def lease_tasks(
             self,
@@ -73,10 +87,14 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
             queue_name: str,
             keys: List[EntityKey],
     ):
-        self._requests(
+        payload = {
+            'keys': [key.key_path() for key in keys]
+
+        }
+        logger.debug(f'payload = {payload}')
+
+        return self._requests(
             method='DELETE',
             path=f'/gumo/pullqueue/{queue_name}/delete',
-            json={
-                'keys': [key.key_path() for key in keys]
-            }
+            payload=payload,
         )

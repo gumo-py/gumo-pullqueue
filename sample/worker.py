@@ -38,10 +38,12 @@ if __name__ == '__main__':
             lease_time=3600,
             lease_size=1,
         )
+        print(tasks)
 
         if len(tasks) > 0:
-            print(tasks)
             delete_service.delete_tasks(tasks=tasks)
-            time.sleep(3)
+            # time.sleep(1)
         else:
             time.sleep(10)
+
+        break

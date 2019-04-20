@@ -56,7 +56,8 @@ class DeleteTasksService:
 
         queue_name = queue_names[0]
         keys = [task.key for task in tasks]
-        self._repository.delete_tasks(
+        response = self._repository.delete_tasks(
             queue_name=queue_name,
             keys=keys,
         )
+        logger.debug(f'delete_tasks response: {response}')
