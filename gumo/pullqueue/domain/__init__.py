@@ -21,8 +21,20 @@ class PullTask:
     def __eq__(self, other):
         return isinstance(other, self.__class__) and self.key == other.key
 
+    def to_json(self) -> dict:
+        return _PullTaskJSONEncoder(pulltask=self).to_json()
 
-class PullTaskJSONEncoder:
+    @classmethod
+    def from_json(cls, doc: dict):
+        """
+        :param doc: Dictionary of PullTask
+        :type doc: dict
+        :rtype: PullTask
+        """
+        return _PullTaskJSONDecoder(doc=doc).decode()
+
+
+class _PullTaskJSONEncoder:
     def __init__(self, pulltask: PullTask):
         self._task = pulltask
 
@@ -37,7 +49,7 @@ class PullTaskJSONEncoder:
         }
 
 
-class PullTaskJSONDecoder:
+class _PullTaskJSONDecoder:
     def __init__(self, doc: dict):
         self._doc = doc
 

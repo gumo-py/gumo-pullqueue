@@ -8,7 +8,6 @@ from typing import Union
 
 from gumo.core import EntityKey
 from gumo.pullqueue import PullTask
-from gumo.pullqueue.domain import PullTaskJSONDecoder
 from gumo.pullqueue.worker.application.repository import PullTaskRemoteRepository
 
 logger = getLogger(__name__)
@@ -58,7 +57,7 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
         )
 
         tasks = [
-            PullTaskJSONDecoder(doc=doc).decode() for doc in plain_tasks.get('tasks', [])
+            PullTask.from_json(doc=doc) for doc in plain_tasks.get('tasks', [])
         ]
 
         return tasks
