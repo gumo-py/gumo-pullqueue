@@ -6,7 +6,7 @@ from typing import List
 from gumo.core import EntityKey
 from gumo.datastore import datastore_transaction
 from gumo.pullqueue.server.application.repository import GumoPullTaskRepository
-from gumo.pullqueue.server.domain import PullTask
+from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import PullTaskStatus
 
 logger = getLogger(__name__)

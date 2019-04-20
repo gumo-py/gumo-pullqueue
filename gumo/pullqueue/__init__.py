@@ -1,5 +1,4 @@
-from gumo.pullqueue.server.domain import PullTask
-
+from gumo.pullqueue.domain import PullTask
 
 __all__ = [
     PullTask.__name__,

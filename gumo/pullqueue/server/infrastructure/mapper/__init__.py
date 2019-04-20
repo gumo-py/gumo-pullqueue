@@ -5,7 +5,7 @@ from injector import inject
 
 from gumo.datastore.infrastructure import EntityKeyMapper
 from gumo.pullqueue.server.domain import GumoPullTask
-from gumo.pullqueue.server.domain import PullTask
+from gumo.pullqueue.domain import PullTask
 from gumo.pullqueue.server.domain import PullTaskState
 from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.domain import PullTaskStatus

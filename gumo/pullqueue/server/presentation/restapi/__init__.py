@@ -6,8 +6,6 @@ from gumo.core import EntityKeyFactory
 from gumo.pullqueue.server.application.enqueue import enqueue
 from gumo.pullqueue.server.application.lease import LeaseTasksService
 from gumo.pullqueue.server.application.lease import DeleteTasksService
-from gumo.pullqueue.server.application.encoder import PullTaskJSONEncoder
-
 
 logger = getLogger(__name__)
 pullqueue_blueprint = flask.Blueprint('server', __name__)
@@ -20,9 +18,7 @@ class EnqueuePullTaskView(flask.views.MethodView):
             in_seconds=5
         )
 
-        return flask.jsonify(
-            PullTaskJSONEncoder(pulltask=task).to_json()
-        )
+        return flask.jsonify(task.to_json())
 
 
 class LeasePullTasksView(flask.views.MethodView):
@@ -36,8 +32,7 @@ class LeasePullTasksView(flask.views.MethodView):
 
         return flask.jsonify({
             'tasks': [
-                PullTaskJSONEncoder(pulltask=task).to_json()
-                for task in tasks
+                task.to_json() for task in tasks
             ]
         })
 
