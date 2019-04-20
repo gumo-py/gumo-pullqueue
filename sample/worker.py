@@ -41,6 +41,10 @@ if __name__ == '__main__':
         print(tasks)
 
         if len(tasks) > 0:
+            task = tasks[0]
+            print('#####')
+            print(task.payload)
+            print('#####')
             delete_service.delete_tasks(tasks=tasks)
             # time.sleep(1)
         else:
