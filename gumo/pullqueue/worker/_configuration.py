@@ -26,6 +26,7 @@ class _ConfigurationFactory:
             polling_sleep_seconds=polling_sleep_seconds,
         )
 
+
 def configure(
         server_url: str,
         polling_sleep_seconds: Optional[int] = None,
