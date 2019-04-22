@@ -67,7 +67,7 @@ class DeletePullTasksView(flask.views.MethodView):
 
 pullqueue_blueprint.add_url_rule(
     '/gumo/pullqueue/enqueue',
-    view_func=EnqueuePullTaskView.as_view(name='gumo/server/enqueue'),
+    view_func=EnqueuePullTaskView.as_view(name='gumo/pullqueue/enqueue'),
     methods=['GET']
 )
 
