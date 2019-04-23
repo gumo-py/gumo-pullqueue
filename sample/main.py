@@ -13,7 +13,7 @@ from gumo.pullqueue.server import pullqueue_flask_blueprint
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') is None:
+if 'GAE_DEPLOYMENT_ID' not in os.environ and os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') is None:
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/path/to/credential.json'
 
 # Initialization process in development environment.
