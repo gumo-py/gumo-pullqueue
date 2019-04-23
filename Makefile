@@ -1,4 +1,5 @@
 package_name = gumo-pullqueue
+sample_project_name = ${gcp_project_name:-gumo-pullqueue}
 
 .PHONY: test
 test:
@@ -42,3 +43,7 @@ deploy:
 		-e TWINE_PASSWORD=${TWINE_PASSWORD} \
 		server \
 		make -f tools/Makefile deploy
+
+.PHONY: sample-deploy
+sample-deploy:
+	gcloud app deploy sample/app.yaml --project=${sample_project_name}
