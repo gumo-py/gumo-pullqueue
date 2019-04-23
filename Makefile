@@ -49,7 +49,13 @@ sample-deploy:
 	docker-compose run --rm \
 		server \
 		make -f tools/Makefile sample-pip-compile
+
 	gcloud app deploy \
 		sample/app.yaml \
+		--project=${sample_project_name} \
+		--quiet
+
+	gcloud datastore indexes create \
+		sample/index.yaml \
 		--project=${sample_project_name} \
 		--quiet
