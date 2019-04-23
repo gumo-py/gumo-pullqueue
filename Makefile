@@ -20,6 +20,10 @@ server:
 worker:
 	docker-compose run --rm --service-ports worker
 
+.PHONY: gae-worker
+gae-worker:
+	docker-compose run --rm --service-ports worker make -f tools/Makefile gae-worker
+
 .PHONY: build
 build:
 	docker-compose run --rm server make -f tools/Makefile build

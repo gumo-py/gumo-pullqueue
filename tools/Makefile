@@ -62,6 +62,10 @@ server: setup
 worker: setup
 	PYTHONPATH=. python sample/worker.py
 
+.PHONY: gae-worker
+gae-worker: setup
+	PYTHONPATH=. python sample/gae_worker.py
+
 .PHONY: sample-pip-compile
 sample-pip-compile:
 	pip-compile \
