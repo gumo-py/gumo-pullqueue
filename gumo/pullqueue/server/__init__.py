@@ -11,5 +11,5 @@ __all__ = [
     enqueue.__name__,
     PullTask.__name__,
 
-    pullqueue_flask_blueprint.__name__,
+    'pullqueue_flask_blueprint',
 ]
