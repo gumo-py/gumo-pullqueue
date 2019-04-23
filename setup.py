@@ -6,7 +6,9 @@ version = '0.0.3'
 description = 'Gumo PullQueue Library'
 dependencies = [
     'gumo-core >= 0.0.18',
-    'gumo-datastore >= 0.0.11'
+    'gumo-datastore >= 0.0.11',
+    'Flask >= 1.0.2',
+    'flasgger >= 0.9.1',
 ]
 
 with open("README.md", "r") as fh:
