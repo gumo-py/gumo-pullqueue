@@ -49,4 +49,7 @@ sample-deploy:
 	docker-compose run --rm \
 		server \
 		make -f tools/Makefile sample-pip-compile
-	gcloud app deploy sample/app.yaml --project=${sample_project_name}
+	gcloud app deploy \
+		sample/app.yaml \
+		--project=${sample_project_name} \
+		--quiet
