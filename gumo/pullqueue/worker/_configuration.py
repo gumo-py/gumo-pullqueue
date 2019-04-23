@@ -17,6 +17,7 @@ class _ConfigurationFactory:
             server_url: str,
             polling_sleep_seconds: Optional[int] = None,
             request_logger: Optional[object] = None,
+            target_audience_client_id: Optional[str] = None,
     ) -> PullQueueWorkerConfiguration:
 
         if polling_sleep_seconds is None:
@@ -26,6 +27,7 @@ class _ConfigurationFactory:
             server_url=server_url,
             polling_sleep_seconds=polling_sleep_seconds,
             request_logger=request_logger,
+            target_audience_client_id=target_audience_client_id,
         )
 
 
@@ -33,11 +35,13 @@ def configure(
         server_url: str,
         polling_sleep_seconds: Optional[int] = None,
         request_logger: Optional[object] = None,
+        target_audience_client_id: Optional[str] = None,
 ) -> PullQueueWorkerConfiguration:
     config = _ConfigurationFactory().build(
         server_url=server_url,
         polling_sleep_seconds=polling_sleep_seconds,
         request_logger=request_logger,
+        target_audience_client_id=target_audience_client_id,
     )
 
     injector.binder.bind(PullQueueWorkerConfiguration, config)

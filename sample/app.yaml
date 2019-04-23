@@ -2,5 +2,6 @@ runtime: python37
 service: default
 
 env_variables:
-  PROJECT_NAME: gumo-example
-  PROJECT_LOCATION: us-central1
+  PROJECT_NAME: gumo-pullqueue
+  PROJECT_LOCATION: asia-northeast1
+  SERVICE_ACCOUNT_CREDENTIAL_LOCATION: gs://gumo-pullqueue-secrets/gumo-pullqueue-9970651a53fb.json
