@@ -3,6 +3,4 @@ service: default
 
 env_variables:
   PROJECT_NAME: gumo-pullqueue
-  PROJECT_LOCATION: ap-northeast1
-
-entrypoint: server.app
+  PROJECT_LOCATION: asia-northeast1

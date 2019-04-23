@@ -1,5 +1,5 @@
 package_name = gumo-pullqueue
-sample_project_name = ${gcp_project_name:-gumo-pullqueue}
+sample_project_name := $(or ${PROJECT_NAME},gumo-pullqueue)
 
 .PHONY: test
 test:
@@ -46,4 +46,7 @@ deploy:
 
 .PHONY: sample-deploy
 sample-deploy:
+	docker-compose run --rm \
+		server \
+		make -f tools/Makefile sample-pip-compile
 	gcloud app deploy sample/app.yaml --project=${sample_project_name}

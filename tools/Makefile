@@ -56,8 +56,15 @@ test: setup build fasttest
 
 .PHONY: server
 server: setup
-	PYTHONPATH=. python sample/server.py
+	PYTHONPATH=. python sample/main.py
 
 .PHONY: worker
 worker: setup
 	PYTHONPATH=. python sample/worker.py
+
+.PHONY: sample-pip-compile
+sample-pip-compile:
+	pip-compile \
+		--upgrade-package gumo-pullqueue \
+		--output-file sample/requirements.txt \
+		sample/requirements.in

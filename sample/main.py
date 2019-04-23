@@ -8,7 +8,7 @@ from gumo.core import MockAppEngineEnvironment
 from gumo.core import configure as core_configure
 from gumo.datastore import configure as datastore_configure
 from gumo.pullqueue.server import configure as pullqueue_configure
-from gumo.pullqueue.server.presentation.restapi import pullqueue_blueprint
+from gumo.pullqueue.server import pullqueue_flask_blueprint
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -41,7 +41,12 @@ pullqueue_configure(
 )
 
 app = flask.Flask(__name__)
-app.register_blueprint(pullqueue_blueprint)
+app.register_blueprint(pullqueue_flask_blueprint)
+
+
+@app.route('/')
+def hello():
+    return 'Hi, gumo-pullqueue.'
 
 
 if __name__ == '__main__':
