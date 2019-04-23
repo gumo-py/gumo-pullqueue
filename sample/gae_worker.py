@@ -31,6 +31,10 @@ core_configure(
 
 pullqueue_worker_configure(
     server_url=os.environ.get('SERVER_URL', 'https://gumo-pullqueue.appspot.com/'),
+    target_audience_client_id=os.environ.get(
+        'AUDIENCE_CLIENT_ID',
+        '662327322493-6h9aduu73vuusvietthatbvngdp28hnv.apps.googleusercontent.com'
+    ),
 )
 
 if __name__ == '__main__':
