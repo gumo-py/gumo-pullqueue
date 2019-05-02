@@ -1,4 +1,3 @@
-import requests
 import json
 import uuid
 from logging import getLogger
@@ -12,6 +11,7 @@ import google.auth.transport.requests
 
 from gumo.core import EntityKey
 from gumo.core import get_google_oauth_credential
+from gumo.core import get_google_id_token_credential
 
 from gumo.pullqueue import PullTask
 from gumo.pullqueue.worker.application.repository import PullTaskRemoteRepository
@@ -87,6 +87,10 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
             path: str,
             payload: Optional[dict] = None,
     ) -> Union[dict, str]:
+        id_token_credential, request = get_google_id_token_credential(
+            target_audience=self._configuration.target_audience_client_id,
+            with_refresh=True
+        )
         url = urljoin(
             base=self._server_url(),
             url=path,
@@ -102,10 +106,6 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
             'X-Worker-Request-ID': request_id,
         }
 
-        authorization_header = self._authorization_header()
-        if authorization_header:
-            headers['Authorization'] = authorization_header
-
         if self._request_log_enabled:
             self._log_request(
                 request_id=request_id,
@@ -115,7 +115,9 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
                 headers=headers
             )
 
-        response = requests.request(
+        id_token_credential.apply(headers=headers)
+
+        response = request(
             method=method,
             url=url,
             data=data,
