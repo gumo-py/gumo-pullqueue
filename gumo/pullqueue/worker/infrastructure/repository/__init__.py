@@ -1,5 +1,6 @@
 import json
 import uuid
+import requests
 from logging import getLogger
 from urllib.parse import urljoin
 from typing import List
@@ -117,7 +118,7 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
 
         id_token_credential.apply(headers=headers)
 
-        response = request(
+        response = requests.request(
             method=method,
             url=url,
             data=data,
