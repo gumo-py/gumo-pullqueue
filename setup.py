@@ -2,7 +2,7 @@ import setuptools
 
 
 name = 'gumo-pullqueue'
-version = '0.0.7'
+version = '0.0.8'
 description = 'Gumo PullQueue Library'
 dependencies = [
     'gumo-core >= 0.0.27',
