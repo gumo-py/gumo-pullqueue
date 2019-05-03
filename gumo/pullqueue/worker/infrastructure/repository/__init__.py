@@ -1,45 +1,19 @@
-import requests
 import json
 import uuid
+import requests
 from logging import getLogger
 from urllib.parse import urljoin
 from typing import List
 from typing import Optional
 from typing import Union
 
-import google.oauth2.service_account
-import google.auth.transport.requests
-
 from gumo.core import EntityKey
-from gumo.core import get_google_oauth_credential
+from gumo.core import get_google_id_token_credential
 
 from gumo.pullqueue import PullTask
 from gumo.pullqueue.worker.application.repository import PullTaskRemoteRepository
 
 logger = getLogger(__name__)
-
-
-def _get_iap_header(audience_client_id: str):
-    oauth_token_uri = 'https://www.googleapis.com/oauth2/v4/token'
-
-    signer = get_google_oauth_credential()
-    service_account_credentials = google.oauth2.service_account.Credentials(
-        signer.signer,
-        signer.signer_email,
-        token_uri=oauth_token_uri,
-        additional_claims={
-            'target_audience': audience_client_id,
-        }
-    )
-
-    request = google.auth.transport.requests.Request()
-    body = {
-        'assertion': service_account_credentials._make_authorization_grant_assertion(),
-        'grant_type': google.oauth2._client._JWT_GRANT_TYPE,
-    }
-    token_response = google.oauth2._client._token_endpoint_request(request, oauth_token_uri, body)
-
-    return 'Bearer ' + token_response['id_token']
 
 
 class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
@@ -73,14 +47,6 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
     def _audience_client_id(self) -> Optional[str]:
         return self._configuration.target_audience_client_id
 
-    def _authorization_header(self) -> Optional[str]:
-        if self._audience_client_id() is None:
-            return
-
-        return _get_iap_header(
-            audience_client_id=self._configuration.target_audience_client_id,
-        )
-
     def _requests(
             self,
             method: str,
@@ -102,10 +68,6 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
             'X-Worker-Request-ID': request_id,
         }
 
-        authorization_header = self._authorization_header()
-        if authorization_header:
-            headers['Authorization'] = authorization_header
-
         if self._request_log_enabled:
             self._log_request(
                 request_id=request_id,
@@ -114,6 +76,13 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
                 data=data,
                 headers=headers
             )
+
+        if self._audience_client_id():
+            id_token_credential, request = get_google_id_token_credential(
+                target_audience=self._audience_client_id(),
+                with_refresh=True
+            )
+            id_token_credential.apply(headers=headers)
 
         response = requests.request(
             method=method,
