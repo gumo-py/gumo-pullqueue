@@ -2,11 +2,11 @@ import setuptools
 
 
 name = 'gumo-pullqueue'
-version = '0.0.8'
+version = '0.1.0a0'
 description = 'Gumo PullQueue Library'
 dependencies = [
-    'gumo-core >= 0.0.27',
-    'gumo-datastore >= 0.0.11',
+    'gumo-core >= 0.1.0a7',
+    'gumo-datastore >= 0.1.0a3',
     'Flask >= 1.0.2',
     'flasgger >= 0.9.1',
 ]
