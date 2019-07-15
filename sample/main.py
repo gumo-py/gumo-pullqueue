@@ -1,40 +1,16 @@
-import os
 import sys
 import logging
+import datetime
 
 import flask.views
 
-from gumo.core import MockAppEngineEnvironment
-from gumo.core import configure as core_configure
-from gumo.datastore import configure as datastore_configure
 from gumo.pullqueue.server import configure as pullqueue_configure
 from gumo.pullqueue.server import pullqueue_flask_blueprint
+from gumo.pullqueue.server import enqueue
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-if 'GAE_DEPLOYMENT_ID' not in os.environ and os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') is None:
-    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/path/to/credential.json'
-
-# Initialization process in development environment.
-if __name__ == '__main__' or 'PYTEST' in os.environ:
-    app_yaml_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        'app.yaml'
-    )
-    MockAppEngineEnvironment.load_app_yaml(app_yaml_path=app_yaml_path)
-
-# Application framework initialization process.
-core_configure(
-    google_cloud_project=os.environ.get('PROJECT_NAME'),
-    google_cloud_location=os.environ.get('PROJECT_LOCATION'),
-)
-
-datastore_configure(
-    use_local_emulator='DATASTORE_EMULATOR_HOST' in os.environ,
-    emulator_host=os.environ.get('DATASTORE_EMULATOR_HOST'),
-    namespace=os.environ.get('DATASTORE_NAMESPACE'),
-)
 
 pullqueue_configure(
     default_queue_name='pullqueue'
@@ -47,6 +23,19 @@ app.register_blueprint(pullqueue_flask_blueprint)
 @app.route('/')
 def hello():
     return 'Hi, gumo-pullqueue.'
+
+
+@app.route('/enqueue')
+def enqueue_handler():
+    task = enqueue(
+        queue_name='pullqueue',
+        payload={
+            'message': 'this is message',
+            'timestamp': datetime.datetime.utcnow().isoformat()
+        }
+    )
+
+    return f'enqueue done. {task}'
 
 
 if __name__ == '__main__':
