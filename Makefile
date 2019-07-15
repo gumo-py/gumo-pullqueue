@@ -32,16 +32,16 @@ build:
 fastbuild:
 	docker-compose run --rm server make -f tools/Makefile fastbuild
 
-.PHONY: test-deploy
-test-deploy:
+.PHONY: test-release
+test-release:
 	docker-compose run --rm \
 		-e TWINE_USERNAME=${TWINE_USERNAME} \
 		-e TWINE_PASSWORD=${TWINE_PASSWORD} \
 		server \
 		make -f tools/Makefile test-deploy
 
-.PHONY: deploy
-deploy:
+.PHONY: release
+release:
 	docker-compose run --rm \
 		-e TWINE_USERNAME=${TWINE_USERNAME} \
 		-e TWINE_PASSWORD=${TWINE_PASSWORD} \
