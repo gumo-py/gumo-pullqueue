@@ -22,7 +22,9 @@ worker:
 
 .PHONY: gae-worker
 gae-worker:
-	docker-compose run --rm --service-ports worker make -f tools/Makefile gae-worker
+	docker-compose run --rm --service-ports \
+		-e GOOGLE_APPLICATION_CREDENTIALS=credentials/service-account-development.json \
+		worker make -f tools/Makefile gae-worker
 
 .PHONY: build
 build:
