@@ -9,6 +9,7 @@ from gumo.datastore.infrastructure import DatastoreRepositoryMixin
 from gumo.pullqueue.server.application.repository import GumoPullTaskRepository
 from gumo.pullqueue.server.domain import GumoPullTask
 from gumo.pullqueue.server.domain import PullTaskStatus
+from gumo.pullqueue.server.domain.configuration import PullQueueConfiguration
 from gumo.pullqueue.server.infrastructure.mapper import DatastoreGumoPullTaskMapper
 
 logger = getLogger(__name__)
@@ -18,9 +19,10 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
     @inject
     def __init__(
             self,
+            pullqueue_configuration: PullQueueConfiguration,
             pulltask_mapper: DatastoreGumoPullTaskMapper,
     ):
-        super(DatastoreGumoPullTaskReqpository, self).__init__()
+        self._pullqueue_configuration = pullqueue_configuration
         self._pulltask_mapper = pulltask_mapper
 
     def save(

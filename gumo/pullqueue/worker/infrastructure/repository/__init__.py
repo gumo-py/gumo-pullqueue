@@ -8,7 +8,7 @@ from typing import Optional
 from typing import Union
 
 from gumo.core import EntityKey
-from gumo.core import get_google_id_token_credential
+from gumo.core import get_google_id_token_credentials
 
 from gumo.pullqueue import PullTask
 from gumo.pullqueue.worker.application.repository import PullTaskRemoteRepository
@@ -78,7 +78,7 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
             )
 
         if self._audience_client_id():
-            id_token_credential, request = get_google_id_token_credential(
+            id_token_credential, request = get_google_id_token_credentials(
                 target_audience=self._audience_client_id(),
                 with_refresh=True
             )

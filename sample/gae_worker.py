@@ -2,8 +2,6 @@ import os
 import sys
 import logging
 
-from gumo.core import MockAppEngineEnvironment
-from gumo.core import configure as core_configure
 from gumo.core.injector import injector
 from gumo.pullqueue.worker import configure as pullqueue_worker_configure
 from gumo.pullqueue.worker.application.service import LeaseTasksService
@@ -14,20 +12,6 @@ logger = logging.getLogger(__name__)
 
 if 'GAE_DEPLOYMENT_ID' not in os.environ and os.environ.get('GOOGLE_APPLICATION_CREDENTIALS') is None:
     raise RuntimeError('environment variable "GOOGLE_APPLICATION_CREDENTIALS" must be present.')
-
-# Initialization process in development environment.
-if __name__ == '__main__' or 'PYTEST' in os.environ:
-    app_yaml_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        'app.yaml'
-    )
-    MockAppEngineEnvironment.load_app_yaml(app_yaml_path=app_yaml_path)
-
-core_configure(
-    google_cloud_project=os.environ.get('PROJECT_NAME'),
-    google_cloud_location=os.environ.get('PROJECT_LOCATION'),
-    service_account_credential_path=os.environ.get('SERVICE_ACCOUNT_CREDENTIAL_LOCATION'),
-)
 
 pullqueue_worker_configure(
     server_url=os.environ.get('SERVER_URL', 'https://gumo-pullqueue.appspot.com/'),

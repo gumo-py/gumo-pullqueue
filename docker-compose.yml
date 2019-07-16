@@ -7,14 +7,13 @@ services:
     volumes:
       - .:/app
       - python-cache:/root/.cache/pip
-      # - ~/.config/gcloud:/root/.config/gcloud
     depends_on:
       - datastore_emulator
     ports:
       - "8080:8080"
     environment:
       DOCKER: "true"
-      GOOGLE_APPLICATION_CREDENTIALS: "/app/credentials/service-account-development.json"
+      GOOGLE_CLOUD_PROJECT: gumo-pullqueue
       DATASTORE_EMULATOR_HOST: "datastore_emulator:8081"
     command: make -f tools/Makefile server
 
@@ -29,7 +28,7 @@ services:
     environment:
       DOCKER: "true"
       PYTEST: "true"
-      GOOGLE_APPLICATION_CREDENTIALS: "/app/credentials/service-account-development.json"
+      GOOGLE_CLOUD_PROJECT: gumo-pullqueue
       DATASTORE_EMULATOR_HOST: "datastore_emulator_test:8082"
       USE_TASK_EMULATOR: "true"
     command: make -f tools/Makefile test
@@ -45,7 +44,7 @@ services:
       - server
     environment:
       DOCKER: "true"
-      GOOGLE_APPLICATION_CREDENTIALS: "/app/credentials/service-account-development.json"
+      GOOGLE_CLOUD_PROJECT: gumo-pullqueue
     command: make -f tools/Makefile worker
 
   datastore_emulator:
