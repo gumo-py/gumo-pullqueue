@@ -1,3 +1,5 @@
+from injector import singleton
+
 from logging import getLogger
 
 from typing import Optional
@@ -44,7 +46,11 @@ def configure(
         target_audience_client_id=target_audience_client_id,
     )
 
-    injector.binder.bind(PullQueueWorkerConfiguration, config)
+    injector.binder.bind(PullQueueWorkerConfiguration, to=config, scope=singleton)
     injector.binder.install(pullqueue_worker_bind)
 
     return config
+
+
+def get_config() -> PullQueueWorkerConfiguration:
+    return injector.get(PullQueueWorkerConfiguration)
