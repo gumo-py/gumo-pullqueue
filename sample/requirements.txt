@@ -21,7 +21,7 @@ google-cloud-storage==1.15.0  # via gumo-core
 google-resumable-media==0.3.2  # via google-cloud-storage
 googleapis-common-protos==1.5.9  # via google-api-core
 grpcio==1.20.0            # via google-api-core
-gumo-core==0.1.0a7        # via gumo-datastore, gumo-pullqueue
+gumo-core==0.1.2          # via gumo-datastore, gumo-pullqueue
 gumo-datastore==0.1.0a3   # via gumo-pullqueue
 gumo-pullqueue==0.1.0a2
 httplib2==0.12.1          # via google-api-python-client, google-auth-httplib2
