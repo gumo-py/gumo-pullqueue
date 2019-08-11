@@ -1,6 +1,8 @@
 import dataclasses
 import datetime
 import enum
+import copy
+
 from typing import Optional
 from typing import List
 
@@ -12,6 +14,12 @@ from gumo.pullqueue.domain import PullTask
 class PullTaskWorker:
     address: str
     name: str
+
+    def to_json(self) -> dict:
+        return {
+            'address': self.address,
+            'name': self.name,
+        }
 
 
 class PullTaskStatus(enum.Enum):
@@ -48,11 +56,66 @@ class PullTaskState:
 
 
 @dataclasses.dataclass(frozen=True)
-class PullTaskLog:
-    action: str
+class TaskEvent:
     event_at: datetime.datetime
     worker: PullTaskWorker
-    payload: dict
+
+    def to_json(self) -> dict:
+        return {
+            'event_name': self.__class__.__name__,
+            'event_at': self.event_at.isoformat(),
+            'worker': self.worker.to_json(),
+        }
+
+    @classmethod
+    def load_json(cls, j: dict):
+        clazz = None
+        event_name = j.get('event_name')
+        for c in cls.__subclasses__():
+            if event_name == c.__name__:
+                clazz = c
+                break
+        if clazz is None:
+            raise ValueError(f'Invalid event_name={event_name}')
+
+        j = copy.copy(j)
+        del j['event_name']
+        return clazz(**j)
+
+
+@dataclasses.dataclass(frozen=True)
+class LeaseRequest(TaskEvent):
+    lease_time: int
+
+    def to_json(self) -> dict:
+        j = super(self).to_json()
+        j['lease_time'] = self.lease_time
+        return j
+
+
+@dataclasses.dataclass(frozen=True)
+class LeaseExtendRequest(TaskEvent):
+    lease_extend_time: int
+
+    def to_json(self) -> dict:
+        j = super(self).to_json()
+        j['lease_extend_time'] = self.lease_extend_time
+        return j
+
+
+@dataclasses.dataclass(frozen=True)
+class SuccessRequest(TaskEvent):
+    pass
+
+
+@dataclasses.dataclass(frozen=True)
+class FailureRequest(TaskEvent):
+    message: str
+
+    def to_json(self) -> dict:
+        j = super(self).to_json()
+        j['message'] = self.message
+        return j
 
 
 @dataclasses.dataclass(frozen=True)
@@ -64,7 +127,7 @@ class GumoPullTask:
 
     task: PullTask
     state: PullTaskState
-    logs: List[PullTaskLog]
+    event_logs: List[TaskEvent]
 
     @property
     def key(self) -> EntityKey:
