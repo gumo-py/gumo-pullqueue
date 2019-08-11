@@ -13,12 +13,6 @@ class GumoPullTaskRepository:
     ):
         raise NotImplementedError()
 
-    def multi_save(
-            self,
-            tasks: List[GumoPullTask],
-    ):
-        raise NotImplementedError()
-
     def fetch_available_tasks(
             self,
             queue_name: str,
