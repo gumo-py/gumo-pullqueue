@@ -15,7 +15,6 @@ class PullTaskWorker:
 
 
 class PullTaskStatus(enum.Enum):
-    initial = 'initial'
     available = 'available'
     leased = 'leased'
     deleted = 'deleted'
@@ -25,12 +24,12 @@ class PullTaskStatus(enum.Enum):
         try:
             return cls(name)
         except ValueError:
-            return cls.initial
+            return cls.available
 
 
 @dataclasses.dataclass(frozen=True)
 class PullTaskState:
-    status: PullTaskStatus = PullTaskStatus.initial
+    status: PullTaskStatus = PullTaskStatus.available
     execution_count: int = 0
     retry_count: int = 0
     last_executed_at: Optional[datetime.datetime] = None
