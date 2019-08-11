@@ -16,6 +16,7 @@ class GumoPullTaskRepository:
     def fetch_available_tasks(
             self,
             queue_name: str,
+            tag: Optional[str] = None,
             size: int = 100,
             now: Optional[datetime.datetime] = None,
     ) -> List[GumoPullTask]:

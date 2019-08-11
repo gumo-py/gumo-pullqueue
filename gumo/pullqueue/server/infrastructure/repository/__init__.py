@@ -37,6 +37,7 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
     def fetch_available_tasks(
             self,
             queue_name: str,
+            tag: Optional[str] = None,
             size: int = 100,
             now: Optional[datetime.datetime] = None,
     ) -> List[GumoPullTask]:
@@ -46,6 +47,9 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
         query.add_filter('queue_name', '=', queue_name)
         query.add_filter('status_name', '=', PullTaskStatus.available.name)
         query.add_filter('next_executed_at', '<=', now)
+        if tag is not None:
+            query.add_filter('tag', '=', tag)
+
         query.order = ['next_executed_at']
 
         tasks = []
