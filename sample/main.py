@@ -27,12 +27,15 @@ def hello():
 
 @app.route('/enqueue')
 def enqueue_handler():
+    tag = flask.request.args.get('tag')
+
     task = enqueue(
         queue_name='pullqueue',
         payload={
             'message': 'this is message',
             'timestamp': datetime.datetime.utcnow().isoformat()
-        }
+        },
+        tag=tag,
     )
 
     return f'enqueue done. {task}'
