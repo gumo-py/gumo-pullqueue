@@ -41,3 +41,11 @@ class PullTaskRemoteRepository:
             key: EntityKey,
     ) -> PullTask:
         raise NotImplementedError()
+
+    def failure_task(
+            self,
+            queue_name: str,
+            key: EntityKey,
+            message: str,
+    ) -> PullTask:
+        raise NotImplementedError()

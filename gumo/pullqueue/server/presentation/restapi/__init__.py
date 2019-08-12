@@ -152,6 +152,6 @@ pullqueue_blueprint.add_url_rule(
 
 pullqueue_blueprint.add_url_rule(
     '/gumo/pullqueue/<queue_name>/failure',
-    view_func=FinalizePullTaskView.as_view(name='gumo/pullqueue/failure'),
+    view_func=FailurePullTaskView.as_view(name='gumo/pullqueue/failure'),
     methods=['POST']
 )

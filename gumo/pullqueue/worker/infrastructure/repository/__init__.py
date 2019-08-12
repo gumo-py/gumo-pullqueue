@@ -160,7 +160,26 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
             path=f'/gumo/pullqueue/{queue_name}/finalize',
             payload=payload,
         )
-        print(response)
+
+        task = PullTask.from_json(doc=response.get('task'))
+        return task
+
+    def failure_task(
+            self,
+            queue_name: str,
+            key: EntityKey,
+            message: str,
+    ) -> PullTask:
+        payload = {
+            'key': key.key_path(),
+            'message': message,
+        }
+
+        response = self._requests(
+            method='POST',
+            path=f'/gumo/pullqueue/{queue_name}/failure',
+            payload=payload,
+        )
 
         task = PullTask.from_json(doc=response.get('task'))
         return task

@@ -72,4 +72,21 @@ class FinalizeTaskService:
             queue_name=task.queue_name,
             key=task.key,
         )
-        logger.debug(f'delete_tasks response: {response}')
+        logger.debug(f'finalize_task response: {response}')
+
+
+class FailureTaskService:
+    @inject
+    def __init__(
+            self,
+            repository: PullTaskRemoteRepository,
+    ):
+        self._repository = repository
+
+    def failure_task(self, task: PullTask, message: str):
+        response = self._repository.failure_task(
+            queue_name=task.queue_name,
+            key=task.key,
+            message=message,
+        )
+        logger.debug(f'failure_task response: {response}')
