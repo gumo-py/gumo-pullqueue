@@ -22,6 +22,13 @@ class PullTaskWorker:
             'name': self.name,
         }
 
+    @classmethod
+    def get_server(cls):
+        return cls(
+            address='server',
+            name='server'
+        )
+
 
 class PullTaskStatus(enum.Enum):
     available = 'available'
@@ -112,7 +119,7 @@ class TaskEvent:
         }
 
     @classmethod
-    def load_json(cls, j: dict):
+    def from_json(cls, j: dict):
         clazz = None
         event_name = j.get('event_name')
         for c in cls.__subclasses__():
@@ -122,9 +129,17 @@ class TaskEvent:
         if clazz is None:
             raise ValueError(f'Invalid event_name={event_name}')
 
-        j = copy.copy(j)
-        del j['event_name']
-        return clazz(**j)
+        return clazz(**clazz.load_params(j))
+
+    @classmethod
+    def load_params(cls, j: dict) -> dict:
+        return {
+            'event_at': datetime.datetime.fromisoformat(j['event_at']),
+            'worker': PullTaskWorker(
+                address=j['worker']['address'],
+                name=j['worker']['name'],
+            )
+        }
 
 
 @dataclasses.dataclass(frozen=True)
@@ -176,13 +191,34 @@ class GumoPullTask:
 
 
 @dataclasses.dataclass(frozen=True)
+class EnqueueRequest(TaskEvent):
+    def build_next(self, pulltask: PullTask) -> GumoPullTask:
+        new_state = PullTaskState(
+            status=PullTaskStatus.available,
+            next_executed_at=pulltask.schedule_time,
+        )
+
+        return GumoPullTask(
+            task=pulltask,
+            state=new_state,
+            event_logs=[self]
+        )
+
+
+@dataclasses.dataclass(frozen=True)
 class LeaseRequest(TaskEvent):
     lease_time: int
 
     def to_json(self) -> dict:
-        j = super(self).to_json()
+        j = super(LeaseRequest, self).to_json()
         j['lease_time'] = self.lease_time
         return j
+
+    @classmethod
+    def load_params(cls, j: dict) -> dict:
+        params = super(LeaseRequest, cls).load_params(j)
+        params['lease_time'] = j['lease_time']
+        return params
 
     def build_next(self, task: GumoPullTask) -> GumoPullTask:
         if task.state.status == PullTaskStatus.deleted:
@@ -210,9 +246,15 @@ class LeaseExtendRequest(TaskEvent):
     lease_extend_time: int
 
     def to_json(self) -> dict:
-        j = super(self).to_json()
+        j = super(LeaseExtendRequest, self).to_json()
         j['lease_extend_time'] = self.lease_extend_time
         return j
+
+    @classmethod
+    def load_params(cls, j: dict) -> dict:
+        params = super(LeaseExtendRequest, cls).load_params(j)
+        params['lease_extend_time'] = j['lease_extend_time']
+        return params
 
     def build_next(self, task: GumoPullTask) -> GumoPullTask:
         if task.state.status == PullTaskStatus.deleted:
@@ -279,9 +321,15 @@ class FailureRequest(TaskEvent):
     message: str
 
     def to_json(self) -> dict:
-        j = super(self).to_json()
+        j = super(FailureRequest, self).to_json()
         j['message'] = self.message
         return j
+
+    @classmethod
+    def load_params(cls, j: dict) -> dict:
+        params = super(FailureRequest, cls).load_params(j)
+        params['message'] = j['message']
+        return params
 
     def build_next(
             self,
