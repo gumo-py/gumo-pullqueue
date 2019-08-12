@@ -8,6 +8,7 @@ from gumo.pullqueue.server.application.enqueue import enqueue
 from gumo.pullqueue.server.application.lease import FetchAvailableTasksService
 from gumo.pullqueue.server.application.lease import LeaseTaskService
 from gumo.pullqueue.server.application.lease import FinalizeTaskService
+from gumo.pullqueue.server.application.lease import FailureTaskService
 
 logger = getLogger(__name__)
 pullqueue_blueprint = flask.Blueprint('server', __name__)
@@ -95,6 +96,36 @@ class FinalizePullTaskView(flask.views.MethodView):
         })
 
 
+class FailurePullTaskView(flask.views.MethodView):
+    def post(self, queue_name: str):
+        key_factory = EntityKeyFactory()
+        service: FailureTaskService = injector.get(FailureTaskService)
+
+        payload: dict = flask.request.json
+        if payload.get('key') is None:
+            raise ValueError(f'Invalid request payload: missing `key`')
+
+        key = key_factory.build_from_key_path(key_path=payload.get('key'))
+        worker_name = payload.get('worker_name', '<unknown>')
+        message = payload.get('message')
+
+        worker = PullTaskWorker(
+            address=flask.request.headers.get('X-Appengine-User-Ip', flask.request.remote_addr),
+            name=worker_name,
+        )
+
+        task = service.failure_task(
+            queue_name=queue_name,
+            key=key,
+            message=message,
+            worker=worker,
+        )
+
+        return flask.jsonify({
+            'task': task.to_json()
+        })
+
+
 pullqueue_blueprint.add_url_rule(
     '/gumo/pullqueue/enqueue',
     view_func=EnqueuePullTaskView.as_view(name='gumo/pullqueue/enqueue'),
@@ -116,5 +147,11 @@ pullqueue_blueprint.add_url_rule(
 pullqueue_blueprint.add_url_rule(
     '/gumo/pullqueue/<queue_name>/finalize',
     view_func=FinalizePullTaskView.as_view(name='gumo/pullqueue/finalize'),
+    methods=['POST']
+)
+
+pullqueue_blueprint.add_url_rule(
+    '/gumo/pullqueue/<queue_name>/failure',
+    view_func=FinalizePullTaskView.as_view(name='gumo/pullqueue/failure'),
     methods=['POST']
 )

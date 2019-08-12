@@ -3,7 +3,6 @@ import datetime
 from logging import getLogger
 from injector import inject
 from typing import Optional
-from typing import List
 
 from gumo.core import EntityKey
 from gumo.datastore import datastore_transaction
@@ -12,6 +11,7 @@ from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.domain import LeaseRequest
 from gumo.pullqueue.server.domain import SuccessRequest
+from gumo.pullqueue.server.domain import FailureRequest
 
 
 logger = getLogger(__name__)
@@ -104,3 +104,39 @@ class FinalizeTaskService:
         self._repository.save(succeeded_task)
 
         return succeeded_task.task
+
+
+class FailureTaskService:
+    @inject
+    def __init__(
+            self,
+            repository: GumoPullTaskRepository,
+    ):
+        self._repository = repository
+
+    @datastore_transaction()
+    def failure_task(
+            self,
+            queue_name: str,
+            key: EntityKey,
+            message: str,
+            worker: PullTaskWorker,
+    ) -> PullTask:
+        now = datetime.datetime.utcnow()
+        task = self._repository.fetch(key=key)
+
+        if task is None:
+            raise ValueError(f'Task({key.key_literal()}) does not found.')
+
+        if task.task.queue_name != queue_name:
+            raise ValueError(f'Task queue_name is mismatched. (expected: {queue_name}, but received {task.task}')
+
+        event = FailureRequest(
+            event_at=now,
+            worker=worker,
+            message=message,
+        )
+        failure_task = event.build_next(task)
+        self._repository.save(failure_task)
+
+        return failure_task.task
