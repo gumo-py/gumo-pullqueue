@@ -28,6 +28,10 @@ class GumoPullTaskRepository:
     def purge(self):
         raise NotImplementedError()
 
+    def fetch(self, key: EntityKey) -> Optional[GumoPullTask]:
+        tasks = self.fetch_keys(keys=[key])
+        return tasks[0]
+
     def fetch_keys(self, keys: List[EntityKey]) -> List[GumoPullTask]:
         raise NotImplementedError()
 

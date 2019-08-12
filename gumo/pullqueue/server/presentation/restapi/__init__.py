@@ -5,8 +5,9 @@ from gumo.core.injector import injector
 from gumo.core import EntityKeyFactory
 from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.application.enqueue import enqueue
-from gumo.pullqueue.server.application.lease import LeaseTasksService
-from gumo.pullqueue.server.application.lease import DeleteTasksService
+from gumo.pullqueue.server.application.lease import FetchAvailableTasksService
+from gumo.pullqueue.server.application.lease import LeaseTaskService
+from gumo.pullqueue.server.application.lease import FinalizeTaskService
 
 logger = getLogger(__name__)
 pullqueue_blueprint = flask.Blueprint('server', __name__)
@@ -22,17 +23,12 @@ class EnqueuePullTaskView(flask.views.MethodView):
         return flask.jsonify(task.to_json())
 
 
-class LeasePullTasksView(flask.views.MethodView):
+class AvailablePullTasksView(flask.views.MethodView):
     def get(self, queue_name: str):
-        lease_service: LeaseTasksService = injector.get(LeaseTasksService)
-        tasks = lease_service.lease_tasks(
+        service: FetchAvailableTasksService = injector.get(FetchAvailableTasksService)
+        tasks = service.fetch_tasks(
             queue_name=queue_name,
-            lease_time=flask.request.args.get('lease_time', 300),
-            lease_size=flask.request.args.get('lease_size', 10),
-            worker=PullTaskWorker(
-                address=flask.request.headers.get('X-Appengine-User-Ip', flask.request.remote_addr),
-                name=flask.request.args.get('worker_name', '<unknown>'),
-            ),
+            lease_size=int(flask.request.args.get('lease_size', '10')),
             tag=flask.request.args.get('tag'),
         )
 
@@ -43,35 +39,59 @@ class LeasePullTasksView(flask.views.MethodView):
         })
 
 
-class DeletePullTasksView(flask.views.MethodView):
-    def delete(self, queue_name: str):
+class LeasePullTaskView(flask.views.MethodView):
+    def post(self, queue_name: str):
         key_factory = EntityKeyFactory()
-        delete_service: DeleteTasksService = injector.get(DeleteTasksService)
+        lease_service: LeaseTaskService = injector.get(LeaseTaskService)
 
-        body = flask.request.json  # type: dict
-        if body is None or body.get('keys') == []:
-            logger.debug(f'request body or keys is empty. delete processing is skipped.')
-            return flask.jsonify({
-                'processedTaskCount': 0,
-            })
+        payload: dict = flask.request.json
+        if payload.get('key') is None:
+            raise ValueError(f'Invalid request payload: missing `key`')
 
-        keys = [
-            key_factory.build_from_key_path(key_path=key_path)
-            for key_path in body.get('keys', [])
-        ]
-        logger.debug(f'Delete Task Request: {len(keys)} items.')
+        key = key_factory.build_from_key_path(key_path=payload.get('key'))
+        lease_time = payload.get('lease_time', 300)
+        worker_name = payload.get('worker_name', '<unknown>')
 
-        delete_service.delete_tasks(
+        worker = PullTaskWorker(
+            address=flask.request.headers.get('X-Appengine-User-Ip', flask.request.remote_addr),
+            name=worker_name,
+        )
+
+        task = lease_service.lease_task(
             queue_name=queue_name,
-            task_keys=keys,
-            worker=PullTaskWorker(
-                address=flask.request.headers.get('X-Appengine-User-Ip', flask.request.remote_addr),
-                name=flask.request.args.get('worker_name', '<unknown>'),
-            ),
+            key=key,
+            lease_time=lease_time,
+            worker=worker,
+        )
+
+        return flask.jsonify({'task': task.to_json()})
+
+
+class FinalizePullTaskView(flask.views.MethodView):
+    def post(self, queue_name: str):
+        key_factory = EntityKeyFactory()
+        service: FinalizeTaskService = injector.get(FinalizeTaskService)
+
+        payload: dict = flask.request.json
+        if payload.get('key') is None:
+            raise ValueError(f'Invalid request payload: missing `key`')
+
+        key = key_factory.build_from_key_path(key_path=payload.get('key'))
+        worker_name = payload.get('worker_name', '<unknown>')
+
+        worker = PullTaskWorker(
+            address=flask.request.headers.get('X-Appengine-User-Ip', flask.request.remote_addr),
+            name=worker_name,
+        )
+
+        task = service.finalize_task(
+            queue_name=queue_name,
+            key=key,
+            worker=worker,
         )
 
         return flask.jsonify({
-            'processedTaskCount': len(keys),
+            'task': task.to_json()
         })
 
 
@@ -82,13 +102,19 @@ pullqueue_blueprint.add_url_rule(
 )
 
 pullqueue_blueprint.add_url_rule(
-    '/gumo/pullqueue/<queue_name>/lease',
-    view_func=LeasePullTasksView.as_view(name='gumo/pullqueue/lease'),
+    '/gumo/pullqueue/<queue_name>/tasks/available',
+    view_func=AvailablePullTasksView.as_view(name='gumo/pullqueue/tasks/available'),
     methods=['GET']
 )
 
 pullqueue_blueprint.add_url_rule(
-    '/gumo/pullqueue/<queue_name>/delete',
-    view_func=DeletePullTasksView.as_view(name='gumo/pullqueue/delete'),
-    methods=['DELETE']
+    '/gumo/pullqueue/<queue_name>/lease',
+    view_func=LeasePullTaskView.as_view(name='gumo/pullqueue/lease'),
+    methods=['POST']
+)
+
+pullqueue_blueprint.add_url_rule(
+    '/gumo/pullqueue/<queue_name>/finalize',
+    view_func=FinalizePullTaskView.as_view(name='gumo/pullqueue/finalize'),
+    methods=['POST']
 )
