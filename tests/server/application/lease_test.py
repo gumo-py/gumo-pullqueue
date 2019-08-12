@@ -3,13 +3,15 @@ from gumo.core.injector import injector
 from gumo.pullqueue.server.application.enqueue import enqueue
 from gumo.pullqueue.server.application.repository import GumoPullTaskRepository
 from gumo.pullqueue.server.domain import PullTaskWorker
-from gumo.pullqueue.server.application.lease import LeaseTasksService
-from gumo.pullqueue.server.application.lease import DeleteTasksService
+from gumo.pullqueue.server.application.lease import FetchAvailableTasksService
+from gumo.pullqueue.server.application.lease import LeaseTaskService
+from gumo.pullqueue.server.application.lease import FinalizeTaskService
 
 
 def test_lease_tasks_service():
     repo = injector.get(GumoPullTaskRepository)  # type: GumoPullTaskRepository
-    service = injector.get(LeaseTasksService)  # type: LeaseTasksService
+    fetch_service = injector.get(FetchAvailableTasksService)  # type: FetchAvailableTasksService
+    service = injector.get(LeaseTaskService)  # type: LeaseTaskService
 
     repo.purge()
 
@@ -18,21 +20,26 @@ def test_lease_tasks_service():
         queue_name='server',
     )
 
-    tasks = service.lease_tasks(
+    tasks = fetch_service.fetch_tasks(
+        queue_name='server',
+        lease_size=1,
+    )
+
+    leased_task = service.lease_task(
         queue_name='server',
         lease_time=3600,
-        lease_size=1,
+        key=tasks[0].key,
         worker=PullTaskWorker(address='test', name='test-worker'),
     )
 
-    assert len(tasks) == 1
-    assert tasks[0] == task
+    assert leased_task == task
 
 
 def test_delete_tasks_service():
     repo = injector.get(GumoPullTaskRepository)  # type: GumoPullTaskRepository
-    lease_service = injector.get(LeaseTasksService)  # type: LeaseTasksService
-    delete_service = injector.get(DeleteTasksService)  # type: DeleteTasksService
+    fetch_service = injector.get(FetchAvailableTasksService)  # type: FetchAvailableTasksService
+    lease_service = injector.get(LeaseTaskService)  # type: LeaseTaskService
+    delete_service = injector.get(FinalizeTaskService)  # type: FinalizeTaskService
 
     repo.purge()
 
@@ -41,21 +48,26 @@ def test_delete_tasks_service():
         queue_name='server',
     )
 
-    assert len(lease_service.lease_tasks(
+    assert len(fetch_service.fetch_tasks(
         queue_name='server',
-        lease_time=3600,
-        lease_size=100,
-        worker=PullTaskWorker(address='test', name='test-worker'),
+        lease_size=10,
     )) == 1
 
-    delete_service.delete_tasks(
+    leased_task = lease_service.lease_task(
+        queue_name='server',
+        lease_time=3600,
+        key=task.key,
+        worker=PullTaskWorker(address='test', name='test-worker'),
+    )
+
+    assert leased_task.key == task.key
+
+    delete_service.finalize_task(
         queue_name='server',
         task_keys=[task.key],
     )
 
-    assert len(lease_service.lease_tasks(
+    assert len(fetch_service.fetch_tasks(
         queue_name='server',
-        lease_time=3600,
-        lease_size=100,
-        worker=PullTaskWorker(address='test', name='test-worker'),
+        lease_size=10,
     )) == 0
