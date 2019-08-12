@@ -2,6 +2,7 @@ from gumo.core.injector import injector
 
 from gumo.pullqueue.server.application.enqueue import enqueue
 from gumo.pullqueue.server.application.repository import GumoPullTaskRepository
+from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.application.lease import LeaseTasksService
 from gumo.pullqueue.server.application.lease import DeleteTasksService
 
@@ -21,6 +22,7 @@ def test_lease_tasks_service():
         queue_name='server',
         lease_time=3600,
         lease_size=1,
+        worker=PullTaskWorker(address='test', name='test-worker'),
     )
 
     assert len(tasks) == 1
@@ -42,7 +44,8 @@ def test_delete_tasks_service():
     assert len(lease_service.lease_tasks(
         queue_name='server',
         lease_time=3600,
-        lease_size=100
+        lease_size=100,
+        worker=PullTaskWorker(address='test', name='test-worker'),
     )) == 1
 
     delete_service.delete_tasks(
@@ -53,5 +56,6 @@ def test_delete_tasks_service():
     assert len(lease_service.lease_tasks(
         queue_name='server',
         lease_time=3600,
-        lease_size=100
+        lease_size=100,
+        worker=PullTaskWorker(address='test', name='test-worker'),
     )) == 0

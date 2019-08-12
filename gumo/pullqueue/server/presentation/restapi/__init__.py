@@ -3,6 +3,7 @@ import flask.views
 
 from gumo.core.injector import injector
 from gumo.core import EntityKeyFactory
+from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.application.enqueue import enqueue
 from gumo.pullqueue.server.application.lease import LeaseTasksService
 from gumo.pullqueue.server.application.lease import DeleteTasksService
@@ -23,11 +24,16 @@ class EnqueuePullTaskView(flask.views.MethodView):
 
 class LeasePullTasksView(flask.views.MethodView):
     def get(self, queue_name: str):
-        lease_service = injector.get(LeaseTasksService)  # type: LeaseTasksService
+        lease_service: LeaseTasksService = injector.get(LeaseTasksService)
         tasks = lease_service.lease_tasks(
             queue_name=queue_name,
-            lease_time=3600,
-            lease_size=100,
+            lease_time=flask.request.args.get('lease_time', 300),
+            lease_size=flask.request.args.get('lease_size', 10),
+            worker=PullTaskWorker(
+                address=flask.request.headers.get('X-Appengine-User-Ip', flask.request.remote_addr),
+                name=flask.request.args.get('worker_name', '<unknown>'),
+            ),
+            tag=flask.request.args.get('tag'),
         )
 
         return flask.jsonify({

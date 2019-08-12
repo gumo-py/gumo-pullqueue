@@ -1,3 +1,5 @@
+import datetime
+
 from logging import getLogger
 from injector import inject
 from typing import Optional
@@ -8,6 +10,9 @@ from gumo.datastore import datastore_transaction
 from gumo.pullqueue.server.application.repository import GumoPullTaskRepository
 from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import PullTaskStatus
+from gumo.pullqueue.server.domain import PullTaskWorker
+from gumo.pullqueue.server.domain import LeaseRequest
+
 
 logger = getLogger(__name__)
 
@@ -25,17 +30,30 @@ class LeaseTasksService:
             queue_name: str,
             lease_time: int,
             lease_size: int,
-            tag: Optional[str] = None
+            worker: PullTaskWorker,
+            tag: Optional[str] = None,
     ) -> List[PullTask]:
+        now = datetime.datetime.utcnow()
+
         tasks = self._repository.fetch_available_tasks(
             queue_name=queue_name,
-            size=lease_size
+            size=lease_size,
+            tag=tag,
+            now=now,
         )
 
-        # TODO: Update GumoPullTask for lock and lease.
+        event = LeaseRequest(
+            event_at=now,
+            worker=worker,
+            lease_time=lease_time,
+        )
+        leased_tasks = [
+            event.build_next(task) for task in tasks
+        ]
 
-        lease_tasks = [task.task for task in tasks]
-        return lease_tasks
+        self._repository.put_multi(tasks=leased_tasks)
+
+        return [task.task for task in leased_tasks]
 
 
 class DeleteTasksService:
