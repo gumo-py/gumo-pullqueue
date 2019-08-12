@@ -136,7 +136,7 @@ class GumoPullTask:
 
     task: PullTask
     state: PullTaskState
-    event_logs: List[TaskEvent]
+    event_logs: List[TaskEvent] = dataclasses.field(default_factory=list)
 
     @property
     def key(self) -> EntityKey:

@@ -48,5 +48,4 @@ class GumoPullTaskFactory:
         return GumoPullTask(
             task=pull_task,
             state=state,
-            logs=[]
         )

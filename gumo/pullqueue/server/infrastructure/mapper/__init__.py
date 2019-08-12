@@ -4,6 +4,8 @@ import datetime
 from injector import inject
 
 from gumo.datastore.infrastructure import EntityKeyMapper
+from gumo.datastore.infrastructure import DatastoreEntity
+
 from gumo.pullqueue.server.domain import GumoPullTask
 from gumo.pullqueue.domain import PullTask
 from gumo.pullqueue.server.domain import PullTaskState
@@ -52,7 +54,7 @@ class DatastoreGumoPullTaskMapper:
 
         return j
 
-    def to_entity(self, doc: dict) -> GumoPullTask:
+    def to_entity(self, doc: DatastoreEntity) -> GumoPullTask:
         key = self._entity_key_mapper.to_entity_key(datastore_key=doc.key)
 
         task = PullTask(
@@ -89,10 +91,10 @@ class DatastoreGumoPullTaskMapper:
         )
 
         # TODO: implements log mapping rule.
-        logs = []
+        event_logs = []
 
         return GumoPullTask(
             task=task,
             state=state,
-            logs=logs,
+            event_logs=event_logs,
         )
