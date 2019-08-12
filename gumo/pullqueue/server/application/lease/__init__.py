@@ -12,6 +12,7 @@ from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import PullTaskStatus
 from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.domain import LeaseRequest
+from gumo.pullqueue.server.domain import SuccessRequest
 
 
 logger = getLogger(__name__)
@@ -69,7 +70,9 @@ class DeleteTasksService:
             self,
             queue_name: str,
             task_keys: List[EntityKey],
+            worker: PullTaskWorker,
     ):
+        now = datetime.datetime.utcnow()
         tasks = self._repository.fetch_keys(keys=task_keys)
 
         not_found_tasks = [t for t in tasks if t is None]
@@ -82,8 +85,13 @@ class DeleteTasksService:
                 f'Some tasks belong to other queues. (target={queue_name}, other_queue_names={other_queued_tasks})'
             )
 
+        event = SuccessRequest(
+            event_at=now,
+            worker=worker,
+        )
+
         deleted_tasks = [
-            task.with_status(new_status=PullTaskStatus.deleted)
+            event.build_next(task)
             for task in tasks
         ]
         self._repository.put_multi(deleted_tasks)

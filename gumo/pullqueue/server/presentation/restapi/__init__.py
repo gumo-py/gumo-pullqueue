@@ -46,7 +46,7 @@ class LeasePullTasksView(flask.views.MethodView):
 class DeletePullTasksView(flask.views.MethodView):
     def delete(self, queue_name: str):
         key_factory = EntityKeyFactory()
-        delete_service = injector.get(DeleteTasksService)  # type: DeleteTasksService
+        delete_service: DeleteTasksService = injector.get(DeleteTasksService)
 
         body = flask.request.json  # type: dict
         if body is None or body.get('keys') == []:
@@ -64,6 +64,10 @@ class DeletePullTasksView(flask.views.MethodView):
         delete_service.delete_tasks(
             queue_name=queue_name,
             task_keys=keys,
+            worker=PullTaskWorker(
+                address=flask.request.headers.get('X-Appengine-User-Ip', flask.request.remote_addr),
+                name=flask.request.args.get('worker_name', '<unknown>'),
+            ),
         )
 
         return flask.jsonify({
