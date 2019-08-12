@@ -9,6 +9,7 @@ from gumo.pullqueue.server.application.lease import FetchAvailableTasksService
 from gumo.pullqueue.server.application.lease import LeaseTaskService
 from gumo.pullqueue.server.application.lease import FinalizeTaskService
 from gumo.pullqueue.server.application.lease import FailureTaskService
+from gumo.pullqueue.server.application.lease import CheckLeaseExpiredTasksService
 
 logger = getLogger(__name__)
 pullqueue_blueprint = flask.Blueprint('server', __name__)
@@ -22,6 +23,18 @@ class EnqueuePullTaskView(flask.views.MethodView):
         )
 
         return flask.jsonify(task.to_json())
+
+
+class CheckLeaseExpiredTaskView(flask.views.MethodView):
+    def get(self):
+        service: CheckLeaseExpiredTasksService = injector.get(CheckLeaseExpiredTasksService)
+
+        tasks = service.check_and_update_expired_tasks()
+        logger.info(f'Check lease expired task and update it, target task {len(tasks)} items.')
+
+        return flask.jsonify({
+            'tasks': [task.to_json() for task in tasks]
+        })
 
 
 class AvailablePullTasksView(flask.views.MethodView):
@@ -129,6 +142,12 @@ class FailurePullTaskView(flask.views.MethodView):
 pullqueue_blueprint.add_url_rule(
     '/gumo/pullqueue/enqueue',
     view_func=EnqueuePullTaskView.as_view(name='gumo/pullqueue/enqueue'),
+    methods=['GET']
+)
+
+pullqueue_blueprint.add_url_rule(
+    '/gumo/pullqueue/check_expired_tasks',
+    view_func=CheckLeaseExpiredTaskView.as_view(name='gumo/pullqueue/check_expired_tasks'),
     methods=['GET']
 )
 

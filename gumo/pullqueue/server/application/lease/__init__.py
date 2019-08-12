@@ -3,6 +3,7 @@ import datetime
 from logging import getLogger
 from injector import inject
 from typing import Optional
+from typing import List
 
 from gumo.core import EntityKey
 from gumo.datastore import datastore_transaction
@@ -12,9 +13,45 @@ from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.domain import LeaseRequest
 from gumo.pullqueue.server.domain import SuccessRequest
 from gumo.pullqueue.server.domain import FailureRequest
+from gumo.pullqueue.server.domain import LeaseExpired
 
 
 logger = getLogger(__name__)
+
+
+class CheckLeaseExpiredTasksService:
+    @inject
+    def __init__(
+            self,
+            repository: GumoPullTaskRepository
+    ):
+        self._repository = repository
+
+    def check_and_update_expired_tasks(
+            self,
+            now: Optional[datetime.datetime] = None,
+    ) -> List[PullTask]:
+        lease_expired_tasks = self._repository.fetch_lease_expired_tasks(now=now)
+
+        if len(lease_expired_tasks) == 0:
+            logger.debug(f'Lease expired tasks are not found.')
+            return []
+
+        if now is None:
+            now = datetime.datetime.utcnow()
+
+        event = LeaseExpired(
+            event_at=now,
+            worker=PullTaskWorker.get_server(),
+        )
+
+        updated_tasks = [
+            event.build_next(task=task) for task in lease_expired_tasks
+        ]
+
+        self._repository.put_multi(tasks=updated_tasks)
+
+        return [task.task for task in updated_tasks]
 
 
 class FetchAvailableTasksService:

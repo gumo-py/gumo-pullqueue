@@ -369,3 +369,42 @@ class FailureRequest(TaskEvent):
         )
 
         return next_task
+
+
+@dataclasses.dataclass(frozen=True)
+class LeaseExpired(TaskEvent):
+    def build_next(
+            self,
+            task: GumoPullTask,
+            now: Optional[datetime.datetime] = None,
+    ) -> GumoPullTask:
+        if task.state.status != PullTaskStatus.leased:
+            raise ValueError(f'Target task must be status as `leased`, but expected {task.state.status.value}')
+
+        if now is None:
+            now = datetime.datetime.utcnow()
+
+        sleep_seconds = exponential_back_off_with_jitters(
+            base_sleep_seconds=60,
+            attempts=task.state.execution_count,
+            max_sleep_seconds=3600 * 24,
+        )
+
+        new_state = task.state.with_status(
+            new_status=PullTaskStatus.available
+        ).with_lease_info(
+            leased_at=None,
+            lease_expires_at=None,
+            leased_by=None,
+        ).with_schedules(
+            last_executed_at=task.state.leased_at,
+            next_executed_at=now + datetime.timedelta(seconds=sleep_seconds)
+        )
+
+        next_task = task.with_state(
+            new_state=new_state
+        ).add_event_log(
+            event_log=self
+        )
+
+        return next_task

@@ -37,3 +37,9 @@ class GumoPullTaskRepository:
 
     def put_multi(self, tasks: List[GumoPullTask]):
         raise NotImplementedError()
+
+    def fetch_lease_expired_tasks(
+            self,
+            now: Optional[datetime.datetime] = None,
+    ) -> List[GumoPullTask]:
+        raise NotImplementedError()
