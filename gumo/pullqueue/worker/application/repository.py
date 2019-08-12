@@ -2,6 +2,7 @@ from injector import inject
 
 from logging import getLogger
 from typing import List
+from typing import Optional
 
 from gumo.core import EntityKey
 from gumo.pullqueue import PullTask
@@ -18,16 +19,25 @@ class PullTaskRemoteRepository:
     ):
         self._configuration = configuration
 
-    def lease_tasks(
+    def available_tasks(
             self,
             queue_name: str,
-            size: int = 100,
+            size: int = 10,
+            tag: Optional[str] = None,
     ) -> List[PullTask]:
         raise NotImplementedError()
 
-    def delete_tasks(
+    def lease_task(
             self,
             queue_name: str,
-            keys: List[EntityKey],
-    ):
+            task: PullTask,
+            lease_time: int = 300,
+    ) -> PullTask:
+        raise NotImplementedError()
+
+    def finalize_task(
+            self,
+            queue_name: str,
+            key: EntityKey,
+    ) -> PullTask:
         raise NotImplementedError()

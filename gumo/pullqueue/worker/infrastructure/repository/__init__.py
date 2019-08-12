@@ -18,6 +18,10 @@ logger = getLogger(__name__)
 
 class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
     @property
+    def _worker_name(self):
+        return self._configuration.worker_name
+
+    @property
     def _request_log_enabled(self):
         return self._configuration.request_logger is not None
 
@@ -102,35 +106,61 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
         else:
             return response.content
 
-    def lease_tasks(
+    def available_tasks(
             self,
             queue_name: str,
-            size: int = 100,
+            size: int = 10,
+            tag: Optional[str] = None,
     ) -> List[PullTask]:
+        params = [
+            f'lease_size={size}',
+        ]
+        if tag is not None:
+            params.append(f'tag={tag}')
+        query_string = '&'.join(params)
+
         plain_tasks = self._requests(
             method='GET',
-            path=f'/gumo/pullqueue/{queue_name}/lease'
+            path=f'/gumo/pullqueue/{queue_name}/tasks/available?{query_string}',
         )
 
-        tasks = [
-            PullTask.from_json(doc=doc) for doc in plain_tasks.get('tasks', [])
-        ]
+        return [PullTask.from_json(j) for j in plain_tasks.get('tasks')]
 
-        return tasks
-
-    def delete_tasks(
+    def lease_task(
             self,
             queue_name: str,
-            keys: List[EntityKey],
-    ):
-        payload = {
-            'keys': [key.key_path() for key in keys]
+            task: PullTask,
+            lease_time: int = 300,
+    ) -> PullTask:
+        leased_plain_task = self._requests(
+            method='POST',
+            path=f'/gumo/pullqueue/{queue_name}/lease',
+            payload={
+                'key': task.key.key_path(),
+                'lease_time': lease_time,
+                'worker_name': self._worker_name,
+            }
+        )
 
+        task = PullTask.from_json(doc=leased_plain_task.get('task'))
+        return task
+
+    def finalize_task(
+            self,
+            queue_name: str,
+            key: EntityKey,
+    ) -> PullTask:
+        payload = {
+            'key': key.key_path(),
         }
         logger.debug(f'payload = {payload}')
 
-        return self._requests(
-            method='DELETE',
-            path=f'/gumo/pullqueue/{queue_name}/delete',
+        response = self._requests(
+            method='POST',
+            path=f'/gumo/pullqueue/{queue_name}/finalize',
             payload=payload,
         )
+        print(response)
+
+        task = PullTask.from_json(doc=response.get('task'))
+        return task

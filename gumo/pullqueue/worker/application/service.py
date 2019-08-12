@@ -11,7 +11,7 @@ from gumo.pullqueue.worker.application.repository import PullTaskRemoteRepositor
 logger = getLogger(__name__)
 
 
-class LeaseTasksService:
+class FetchAvailableTasksService:
     @inject
     def __init__(
             self,
@@ -19,22 +19,21 @@ class LeaseTasksService:
     ):
         self._repository = repository
 
-    def lease_tasks(
+    def available_tasks(
             self,
             queue_name: str,
-            lease_time: int,
             lease_size: int,
             tag: Optional[str] = None,
     ) -> List[PullTask]:
-        tasks = self._repository.lease_tasks(
+        tasks = self._repository.available_tasks(
             queue_name=queue_name,
             size=lease_size,
+            tag=tag,
         )
 
         return tasks
 
-
-class DeleteTasksService:
+class LeaseTaskService:
     @inject
     def __init__(
             self,
@@ -42,22 +41,35 @@ class DeleteTasksService:
     ):
         self._repository = repository
 
-    def delete_tasks(
+    def lease_task(
             self,
-            tasks: List[PullTask],
-    ):
-        if len(tasks) == 0:
-            logger.debug(f'delete_tasks called with empty lists.')
-            return
-
-        queue_names = list(set([task.queue_name for task in tasks]))
-        if len(queue_names) > 1:
-            raise ValueError(f'A mix of tasks from different queues: {queue_names}')
-
-        queue_name = queue_names[0]
-        keys = [task.key for task in tasks]
-        response = self._repository.delete_tasks(
+            queue_name: str,
+            task: PullTask,
+            lease_time: int,
+    ) -> PullTask:
+        task = self._repository.lease_task(
             queue_name=queue_name,
-            keys=keys,
+            task=task,
+            lease_time=lease_time,
+        )
+
+        return task
+
+
+class FinalizeTaskService:
+    @inject
+    def __init__(
+            self,
+            repository: PullTaskRemoteRepository,
+    ):
+        self._repository = repository
+
+    def finalize_task(
+            self,
+            task: PullTask,
+    ):
+        response = self._repository.finalize_task(
+            queue_name=task.queue_name,
+            key=task.key,
         )
         logger.debug(f'delete_tasks response: {response}')
