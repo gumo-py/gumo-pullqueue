@@ -21,7 +21,7 @@ def build_sample_pull_task():
             schedule_time=datetime.datetime(2019, 1, 1)
         ),
         state=PullTaskState(),
-        logs=[],
+        event_logs=[],
     )
 
 

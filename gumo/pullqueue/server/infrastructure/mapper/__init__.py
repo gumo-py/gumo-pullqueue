@@ -11,6 +11,7 @@ from gumo.pullqueue.domain import PullTask
 from gumo.pullqueue.server.domain import PullTaskState
 from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.domain import PullTaskStatus
+from gumo.pullqueue.server.domain import TaskEvent
 
 
 class DatastoreGumoPullTaskMapper:
@@ -52,6 +53,10 @@ class DatastoreGumoPullTaskMapper:
                 'leased_by.name': pulltask.state.leased_by.name,
             })
 
+        j['event_logs'] = json.dumps([
+            event.to_json() for event in pulltask.event_logs
+        ], ensure_ascii=False, indent=4)
+
         return j
 
     def to_entity(self, doc: DatastoreEntity) -> GumoPullTask:
@@ -90,8 +95,10 @@ class DatastoreGumoPullTaskMapper:
             leased_by=leased_by
         )
 
-        # TODO: implements log mapping rule.
         event_logs = []
+        if doc.get('event_logs') is not None:
+            for event_payload in json.loads(doc.get('event_logs')):
+                event_logs.append(TaskEvent.from_json(event_payload))
 
         return GumoPullTask(
             task=task,
