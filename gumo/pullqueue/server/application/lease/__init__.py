@@ -11,6 +11,7 @@ from gumo.pullqueue.server.application.repository import GumoPullTaskRepository
 from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.domain import LeaseRequest
+from gumo.pullqueue.server.domain import LeaseExtendRequest
 from gumo.pullqueue.server.domain import SuccessRequest
 from gumo.pullqueue.server.domain import FailureRequest
 from gumo.pullqueue.server.domain import LeaseExpired
@@ -95,6 +96,9 @@ class LeaseTaskService:
         now = datetime.datetime.utcnow()
         task = self._repository.fetch(key=key)
 
+        if task is None:
+            raise ValueError(f'Task not found (key={key.key_literal()})')
+
         if task.task.queue_name != queue_name:
             raise ValueError(f'Invalid queue_name={queue_name}, mismatch to {task.task}')
 
@@ -107,6 +111,41 @@ class LeaseTaskService:
 
         self._repository.save(leased_task)
         return leased_task.task
+
+
+class LeaseExtendTaskService:
+    @inject
+    def __init__(
+            self,
+            repository: GumoPullTaskRepository,
+    ):
+        self._repository = repository
+
+    def lease_extend_task(
+            self,
+            queue_name: str,
+            lease_extend_time: int,
+            key: EntityKey,
+            worker: PullTaskWorker,
+    ) -> PullTask:
+        now = datetime.datetime.utcnow()
+        task = self._repository.fetch(key=key)
+
+        if task is None:
+            raise ValueError(f'Task not found (key={key.key_literal()})')
+
+        if task.task.queue_name != queue_name:
+            raise ValueError(f'Invalid queue_name={queue_name}, mismatch to {task.task}')
+
+        event = LeaseExtendRequest(
+            event_at=now,
+            worker=worker,
+            lease_extend_time=lease_extend_time,
+        )
+        lease_extended_task = event.build_next(task=task)
+
+        self._repository.save(lease_extended_task)
+        return lease_extended_task.task
 
 
 class FinalizeTaskService:

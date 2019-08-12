@@ -7,6 +7,7 @@ from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.application.enqueue import enqueue
 from gumo.pullqueue.server.application.lease import FetchAvailableTasksService
 from gumo.pullqueue.server.application.lease import LeaseTaskService
+from gumo.pullqueue.server.application.lease import LeaseExtendTaskService
 from gumo.pullqueue.server.application.lease import FinalizeTaskService
 from gumo.pullqueue.server.application.lease import FailureTaskService
 from gumo.pullqueue.server.application.lease import CheckLeaseExpiredTasksService
@@ -75,6 +76,34 @@ class LeasePullTaskView(flask.views.MethodView):
             queue_name=queue_name,
             key=key,
             lease_time=lease_time,
+            worker=worker,
+        )
+
+        return flask.jsonify({'task': task.to_json()})
+
+
+class LeaseExtendPullTaskView(flask.views.MethodView):
+    def post(self, queue_name: str):
+        key_factory = EntityKeyFactory()
+        service: LeaseExtendTaskService = injector.get(LeaseExtendTaskService)
+
+        payload: dict = flask.request.json
+        if payload.get('key') is None:
+            raise ValueError(f'Invalid request payload: missing `key`')
+
+        key = key_factory.build_from_key_path(key_path=payload.get('key'))
+        lease_extend_time = payload.get('lease_extend_time', 300)
+        worker_name = payload.get('worker_name', '<unknown>')
+
+        worker = PullTaskWorker(
+            address=flask.request.headers.get('X-Appengine-User-Ip', flask.request.remote_addr),
+            name=worker_name,
+        )
+
+        task = service.lease_extend_task(
+            queue_name=queue_name,
+            key=key,
+            lease_extend_time=lease_extend_time,
             worker=worker,
         )
 
@@ -160,6 +189,12 @@ pullqueue_blueprint.add_url_rule(
 pullqueue_blueprint.add_url_rule(
     '/gumo/pullqueue/<queue_name>/lease',
     view_func=LeasePullTaskView.as_view(name='gumo/pullqueue/lease'),
+    methods=['POST']
+)
+
+pullqueue_blueprint.add_url_rule(
+    '/gumo/pullqueue/<queue_name>/lease_extend',
+    view_func=LeaseExtendPullTaskView.as_view(name='gumo/pullqueue/lease_extend'),
     methods=['POST']
 )
 
