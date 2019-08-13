@@ -64,7 +64,8 @@ def test_delete_tasks_service():
 
     delete_service.finalize_task(
         queue_name='server',
-        task_keys=[task.key],
+        key=task.key,
+        worker=PullTaskWorker(address='test', name='test-worker')
     )
 
     assert len(fetch_service.fetch_tasks(

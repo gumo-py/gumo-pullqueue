@@ -175,13 +175,13 @@ class TestLeaseExtendRequest:
             lease_extend_time=300,
         )
 
-        next_task = event.build_next(task=leased_task)
+        next_task = event.build_next(task=leased_task, now=now)
 
         assert next_task != leased_task
         assert len(next_task.event_logs) == len(leased_task.event_logs) + 1
         assert next_task.state.status == leased_task.state.status
         assert next_task.state.leased_at == leased_task.state.leased_at
-        assert next_task.state.lease_expires_at == leased_task.state.lease_expires_at + datetime.timedelta(seconds=300)
+        assert next_task.state.lease_expires_at == now + datetime.timedelta(seconds=300)
         assert next_task.state.leased_by == leased_task.state.leased_by
 
     def test_build_failed_from_available(self):
