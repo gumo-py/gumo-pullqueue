@@ -33,6 +33,7 @@ class FetchAvailableTasksService:
 
         return tasks
 
+
 class LeaseTaskService:
     @inject
     def __init__(
