@@ -49,3 +49,11 @@ class PullTaskRemoteRepository:
             message: str,
     ) -> PullTask:
         raise NotImplementedError()
+
+    def lease_extend_task(
+            self,
+            queue_name: str,
+            key: EntityKey,
+            lease_extend_time: int,
+    ) -> PullTask:
+        raise NotImplementedError()

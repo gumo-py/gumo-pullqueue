@@ -152,6 +152,7 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
     ) -> PullTask:
         payload = {
             'key': key.key_path(),
+            'worker_name': self._worker_name,
         }
         logger.debug(f'payload = {payload}')
 
@@ -173,6 +174,7 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
         payload = {
             'key': key.key_path(),
             'message': message,
+            'worker_name': self._worker_name,
         }
 
         response = self._requests(
@@ -181,5 +183,25 @@ class HttpRequestPullTaskRepository(PullTaskRemoteRepository):
             payload=payload,
         )
 
+        task = PullTask.from_json(doc=response.get('task'))
+        return task
+
+    def lease_extend_task(
+            self,
+            queue_name: str,
+            key: EntityKey,
+            lease_extend_time: int,
+    ) -> PullTask:
+        payload = {
+            'key': key.key_path(),
+            'lease_extend_time': lease_extend_time,
+            'worker_name': self._worker_name,
+        }
+
+        response = self._requests(
+            method='POST',
+            path=f'/gumo/pullqueue/{queue_name}/lease_extend',
+            payload=payload,
+        )
         task = PullTask.from_json(doc=response.get('task'))
         return task

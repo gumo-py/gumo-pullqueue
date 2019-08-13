@@ -90,3 +90,24 @@ class FailureTaskService:
             message=message,
         )
         logger.debug(f'failure_task response: {response}')
+
+
+class LeaseExtendTaskService:
+    @inject
+    def __init__(
+            self,
+            repository: PullTaskRemoteRepository,
+    ):
+        self._repository = repository
+
+    def lease_extend_task(
+            self,
+            task: PullTask,
+            lease_extend_time: int,
+    ):
+        response = self._repository.lease_extend_task(
+            queue_name=task.queue_name,
+            key=task.key,
+            lease_extend_time=lease_extend_time,
+        )
+        logger.debug(f'lease_extend_task response: {response}')

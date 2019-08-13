@@ -256,16 +256,19 @@ class LeaseExtendRequest(TaskEvent):
         params['lease_extend_time'] = j['lease_extend_time']
         return params
 
-    def build_next(self, task: GumoPullTask) -> GumoPullTask:
+    def build_next(self, task: GumoPullTask, now: Optional[datetime.datetime] = None) -> GumoPullTask:
         if task.state.status == PullTaskStatus.deleted:
             raise ValueError(f'Target task can not change status, because already deleted.')
 
         if task.state.status != PullTaskStatus.leased:
             raise ValueError(f'Target task status must equal as leased, but got: {task.state.status}')
 
+        if now is None:
+            now = datetime.datetime.utcnow()
+
         new_state = task.state.with_lease_info(
             leased_at=task.state.leased_at,
-            lease_expires_at=task.state.lease_expires_at + datetime.timedelta(seconds=self.lease_extend_time),
+            lease_expires_at=now + datetime.timedelta(seconds=self.lease_extend_time),
             leased_by=task.state.leased_by,
         )
 
