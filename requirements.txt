@@ -40,4 +40,4 @@ rsa==4.0                  # via google-auth
 six==1.12.0               # via flasgger, google-api-core, google-api-python-client, google-auth, google-resumable-media, grpcio, protobuf
 uritemplate==3.0.0        # via google-api-python-client
 urllib3==1.24.2           # via requests
-werkzeug==0.15.2          # via flask
+werkzeug==0.15.3          # via flask
