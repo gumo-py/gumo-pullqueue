@@ -20,7 +20,7 @@ google-cloud-storage==1.16.1  # via gumo-core
 google-resumable-media==0.3.2  # via google-cloud-storage
 googleapis-common-protos==1.6.0  # via google-api-core
 grpcio==1.22.0            # via google-api-core
-gumo-core==0.1.2
+gumo-core==0.1.3
 gumo-datastore==0.1.1
 httplib2==0.12.1          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
