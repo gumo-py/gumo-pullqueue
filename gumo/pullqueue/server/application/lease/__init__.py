@@ -78,6 +78,31 @@ class FetchAvailableTasksService:
         return [task.task for task in tasks]
 
 
+class CheckExpiredAndFetchAvailableTasksScenario:
+    @inject
+    def __init__(
+            self,
+            check_expired_tasks_service: CheckLeaseExpiredTasksService,
+            fetch_available_tasks_service: FetchAvailableTasksService,
+    ):
+        self._check_expired_tasks_service = check_expired_tasks_service
+        self._fetch_available_tasks_service = fetch_available_tasks_service
+
+    def execute(
+            self,
+            queue_name: str,
+            lease_size: int,
+            tag: Optional[str] = None,
+    ):
+        self._check_expired_tasks_service.check_and_update_expired_tasks()
+
+        return self._fetch_available_tasks_service.fetch_tasks(
+            queue_name=queue_name,
+            lease_size=lease_size,
+            tag=tag,
+        )
+
+
 class LeaseTaskService:
     @inject
     def __init__(
