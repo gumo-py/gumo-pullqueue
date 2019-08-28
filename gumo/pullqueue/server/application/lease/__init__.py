@@ -38,6 +38,8 @@ class CheckLeaseExpiredTasksService:
             logger.debug(f'Lease expired tasks are not found.')
             return []
 
+        logger.info(f'Lease expired tasks exists. {len(lease_expired_tasks)} items.')
+
         if now is None:
             now = datetime.datetime.utcnow()
 
@@ -74,6 +76,7 @@ class FetchAvailableTasksService:
             size=lease_size,
             tag=tag,
         )
+        logger.info(f'Available tasks: {len(tasks)} items.')
 
         return [task.task for task in tasks]
 
