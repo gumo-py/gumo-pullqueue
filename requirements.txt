@@ -21,7 +21,7 @@ google-resumable-media==0.3.2  # via google-cloud-storage
 googleapis-common-protos==1.6.0  # via google-api-core
 grpcio==1.22.0            # via google-api-core
 gumo-core==0.1.2
-gumo-datastore==0.1.0
+gumo-datastore==0.1.1
 httplib2==0.12.1          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
 injector==0.15.0          # via gumo-core
@@ -41,6 +41,3 @@ six==1.12.0               # via flasgger, google-api-core, google-api-python-cli
 uritemplate==3.0.0        # via google-api-python-client
 urllib3==1.24.2           # via requests
 werkzeug==0.15.2          # via flask
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools==41.0.1        # via google-api-core, protobuf

@@ -13,15 +13,10 @@ class GumoPullTaskRepository:
     ):
         raise NotImplementedError()
 
-    def multi_save(
-            self,
-            tasks: List[GumoPullTask],
-    ):
-        raise NotImplementedError()
-
     def fetch_available_tasks(
             self,
             queue_name: str,
+            tag: Optional[str] = None,
             size: int = 100,
             now: Optional[datetime.datetime] = None,
     ) -> List[GumoPullTask]:
@@ -33,8 +28,18 @@ class GumoPullTaskRepository:
     def purge(self):
         raise NotImplementedError()
 
+    def fetch(self, key: EntityKey) -> Optional[GumoPullTask]:
+        tasks = self.fetch_keys(keys=[key])
+        return tasks[0]
+
     def fetch_keys(self, keys: List[EntityKey]) -> List[GumoPullTask]:
         raise NotImplementedError()
 
     def put_multi(self, tasks: List[GumoPullTask]):
+        raise NotImplementedError()
+
+    def fetch_lease_expired_tasks(
+            self,
+            now: Optional[datetime.datetime] = None,
+    ) -> List[GumoPullTask]:
         raise NotImplementedError()

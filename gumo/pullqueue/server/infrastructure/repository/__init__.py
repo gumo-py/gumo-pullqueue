@@ -29,14 +29,13 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
             self,
             pulltask: GumoPullTask
     ):
-        datastore_key = self.entity_key_mapper.to_datastore_key(entity_key=pulltask.key)
-        datastore_entity = self.DatastoreEntity(key=datastore_key)
-        datastore_entity.update(self._pulltask_mapper.to_datastore_entity(pulltask=pulltask))
+        datastore_entity = self._pulltask_mapper.to_datastore_entity(pulltask=pulltask)
         self.datastore_client.put(datastore_entity)
 
     def fetch_available_tasks(
             self,
             queue_name: str,
+            tag: Optional[str] = None,
             size: int = 100,
             now: Optional[datetime.datetime] = None,
     ) -> List[GumoPullTask]:
@@ -44,9 +43,12 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
 
         query = self.datastore_client.query(kind=GumoPullTask.KIND)
         query.add_filter('queue_name', '=', queue_name)
-        query.add_filter('status_name', '=', PullTaskStatus.initial.name)
-        query.add_filter('schedule_time', '<=', now)
-        query.order = ['schedule_time']
+        query.add_filter('status_name', '=', PullTaskStatus.available.name)
+        query.add_filter('next_executed_at', '<=', now)
+        if tag is not None:
+            query.add_filter('tag', '=', tag)
+
+        query.order = ['next_executed_at']
 
         tasks = []
         for datastore_entity in query.fetch(limit=size):
@@ -80,11 +82,25 @@ class DatastoreGumoPullTaskReqpository(GumoPullTaskRepository, DatastoreReposito
     def put_multi(self, tasks: List[GumoPullTask]):
         datastore_entities = []
         for pulltask in tasks:
-            datastore_key = self.entity_key_mapper.to_datastore_key(entity_key=pulltask.key)
-            datastore_entity = self.DatastoreEntity(key=datastore_key)
-            datastore_entity.update(
-                self._pulltask_mapper.to_datastore_entity(pulltask=pulltask)
-            )
+            datastore_entity = self._pulltask_mapper.to_datastore_entity(pulltask=pulltask)
             datastore_entities.append(datastore_entity)
 
         self.datastore_client.put_multi(datastore_entities)
+
+    def fetch_lease_expired_tasks(
+            self,
+            now: Optional[datetime.datetime] = None,
+    ) -> List[GumoPullTask]:
+        if now is None:
+            now = datetime.datetime.utcnow()
+
+        query = self.datastore_client.query(kind=GumoPullTask.KIND)
+        query.add_filter('status_name', '=', PullTaskStatus.leased.value)
+        query.add_filter('lease_expires_at', '<', now)
+
+        tasks = []
+        for datastore_entity in query.fetch():
+            task = self._pulltask_mapper.to_entity(doc=datastore_entity)
+            tasks.append(task)
+
+        return tasks

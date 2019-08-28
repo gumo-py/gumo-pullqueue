@@ -2,8 +2,9 @@ import datetime
 from typing import Optional
 
 from gumo.pullqueue import PullTask
-from gumo.pullqueue.server.domain import PullTaskState
 from gumo.pullqueue.server.domain import GumoPullTask
+from gumo.pullqueue.server.domain import EnqueueRequest
+from gumo.pullqueue.server.domain import PullTaskWorker
 
 from gumo.datastore import EntityKeyFactory
 
@@ -41,12 +42,10 @@ class GumoPullTaskFactory:
             tag=tag,
         )
 
-        state = PullTaskState(
-            next_executed_at=schedule_time,
+        event = EnqueueRequest(
+            event_at=now,
+            worker=PullTaskWorker.get_server()
         )
+        task = event.build_next(pulltask=pull_task)
 
-        return GumoPullTask(
-            task=pull_task,
-            state=state,
-            logs=[]
-        )
+        return task

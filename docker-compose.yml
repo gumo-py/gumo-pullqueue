@@ -67,6 +67,16 @@ services:
       - "8082:8082"
     command: --no-store-on-disk --consistency=1
 
+  datastore_viewer:
+    image: python:3.7.2-stretch
+    environment:
+      DATASTORE_EMULATOR_HOST: datastore_emulator:8081
+      DATASTORE_VIEWER_HOST: 0.0.0.0
+      DATASTORE_VIEWER_PORT: 5001
+    ports:
+      - "5001:5001"
+    command: bash -exc 'pip install datastore-viewer && datastore-viewer'
+
 volumes:
   python-cache:
     driver: local

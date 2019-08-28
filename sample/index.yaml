@@ -4,4 +4,5 @@ indexes:
     properties:
       - name: queue_name
       - name: status_name
-      - name: schedule_time
+      - name: next_executed_at
+      - name: tag

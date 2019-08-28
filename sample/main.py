@@ -27,12 +27,19 @@ def hello():
 
 @app.route('/enqueue')
 def enqueue_handler():
+    tag = flask.request.args.get('tag')
+    extend = flask.request.args.get('extend') is not None
+    fail = flask.request.args.get('fail') is not None
+
     task = enqueue(
         queue_name='pullqueue',
         payload={
             'message': 'this is message',
-            'timestamp': datetime.datetime.utcnow().isoformat()
-        }
+            'timestamp': datetime.datetime.utcnow().isoformat(),
+            'fail': fail,
+            'extend': extend,
+        },
+        tag=tag,
     )
 
     return f'enqueue done. {task}'
