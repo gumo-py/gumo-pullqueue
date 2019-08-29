@@ -11,6 +11,7 @@ from gumo.pullqueue.server.application.lease import LeaseExtendTaskService
 from gumo.pullqueue.server.application.lease import FinalizeTaskService
 from gumo.pullqueue.server.application.lease import FailureTaskService
 from gumo.pullqueue.server.application.lease import CheckLeaseExpiredTasksService
+from gumo.pullqueue.server.application.lease import CheckExpiredAndFetchAvailableTasksScenario
 
 logger = getLogger(__name__)
 pullqueue_blueprint = flask.Blueprint('server', __name__)
@@ -40,12 +41,24 @@ class CheckLeaseExpiredTaskView(flask.views.MethodView):
 
 class AvailablePullTasksView(flask.views.MethodView):
     def get(self, queue_name: str):
-        service: FetchAvailableTasksService = injector.get(FetchAvailableTasksService)
-        tasks = service.fetch_tasks(
-            queue_name=queue_name,
-            lease_size=int(flask.request.args.get('lease_size', '10')),
-            tag=flask.request.args.get('tag'),
-        )
+        fetch_only = flask.request.args.get('fetch_only', None) is not None
+        lease_size = int(flask.request.args.get('lease_size', '10'))
+        tag = flask.request.args.get('tag')
+
+        if fetch_only:
+            service: FetchAvailableTasksService = injector.get(FetchAvailableTasksService)
+            tasks = service.fetch_tasks(
+                queue_name=queue_name,
+                lease_size=lease_size,
+                tag=tag,
+            )
+        else:
+            scenario = injector.get(CheckExpiredAndFetchAvailableTasksScenario)
+            tasks = scenario.execute(
+                queue_name=queue_name,
+                lease_size=lease_size,
+                tag=tag,
+            )
 
         return flask.jsonify({
             'tasks': [

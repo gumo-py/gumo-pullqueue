@@ -38,6 +38,8 @@ class CheckLeaseExpiredTasksService:
             logger.debug(f'Lease expired tasks are not found.')
             return []
 
+        logger.info(f'Lease expired tasks exists. {len(lease_expired_tasks)} items.')
+
         if now is None:
             now = datetime.datetime.utcnow()
 
@@ -74,8 +76,34 @@ class FetchAvailableTasksService:
             size=lease_size,
             tag=tag,
         )
+        logger.info(f'Available tasks: {len(tasks)} items.')
 
         return [task.task for task in tasks]
+
+
+class CheckExpiredAndFetchAvailableTasksScenario:
+    @inject
+    def __init__(
+            self,
+            check_expired_tasks_service: CheckLeaseExpiredTasksService,
+            fetch_available_tasks_service: FetchAvailableTasksService,
+    ):
+        self._check_expired_tasks_service = check_expired_tasks_service
+        self._fetch_available_tasks_service = fetch_available_tasks_service
+
+    def execute(
+            self,
+            queue_name: str,
+            lease_size: int,
+            tag: Optional[str] = None,
+    ):
+        self._check_expired_tasks_service.check_and_update_expired_tasks()
+
+        return self._fetch_available_tasks_service.fetch_tasks(
+            queue_name=queue_name,
+            lease_size=lease_size,
+            tag=tag,
+        )
 
 
 class LeaseTaskService:
