@@ -4,6 +4,7 @@ import logging
 
 from gumo.core.injector import injector
 from gumo.pullqueue.worker import configure as pullqueue_worker_configure
+from gumo.pullqueue.worker.application.service import FetchAvailableTasksService
 from gumo.pullqueue.worker.application.service import LeaseTaskService
 from gumo.pullqueue.worker.application.service import FinalizeTaskService
 
@@ -24,23 +25,35 @@ pullqueue_worker_configure(
 if __name__ == '__main__':
     import time
 
-    lease_service = injector.get(LeaseTaskService)  # type: LeaseTaskService
-    delete_service = injector.get(FinalizeTaskService)  # type: FinalizeTaskService
+    QUEUE_NAME = 'pullqueue'
+
+    fetch_service: FetchAvailableTasksService = injector.get(FetchAvailableTasksService)
+    lease_service: LeaseTaskService = injector.get(LeaseTaskService)
+    finalize_service: FinalizeTaskService = injector.get(FinalizeTaskService)
 
     while True:
-        tasks = lease_service.lease_tasks(
-            queue_name='pullqueue',
-            lease_time=3600,
+        available_tasks = fetch_service.available_tasks(
+            queue_name=QUEUE_NAME,
             lease_size=1,
         )
-        print(tasks)
 
-        if len(tasks) > 0:
-            task = tasks[0]
-            print('#####')
-            print(task.payload)
-            print('#####')
-            delete_service.finalize_task(tasks=[task])
-            time.sleep(1)
-        else:
-            time.sleep(10)
+        if len(available_tasks) == 0:
+            print('available tasks are not found.')
+            print('sleep 5 seconds ...')
+            time.sleep(5)
+            continue
+
+        leased_task = lease_service.lease_task(
+            queue_name=QUEUE_NAME,
+            task=available_tasks[0],
+            lease_time=30,
+        )
+
+        print(f'leased_task = {leased_task}')
+        print('sleep 5 seconds ...')
+        time.sleep(5)
+        finalize_service.finalize_task(task=leased_task)
+        print('finalized.')
+
+        print('sleep 10 seconds...')
+        time.sleep(10)

@@ -3,7 +3,7 @@ from typing import Optional
 
 from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import GumoPullTask
-from gumo.pullqueue.server.domain import EnqueueRequest
+from gumo.pullqueue.server.domain.event import EnqueueRequest
 from gumo.pullqueue.server.domain import PullTaskWorker
 
 from gumo.datastore import EntityKeyFactory
