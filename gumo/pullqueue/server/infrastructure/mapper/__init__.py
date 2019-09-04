@@ -9,7 +9,7 @@ from gumo.pullqueue.domain import PullTask
 from gumo.pullqueue.server.domain import PullTaskState
 from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.domain import PullTaskStatus
-from gumo.pullqueue.server.domain import TaskEvent
+from gumo.pullqueue.server.domain.event import TaskEvent
 
 
 class DatastoreGumoPullTaskMapper(DatastoreMapperMixin):

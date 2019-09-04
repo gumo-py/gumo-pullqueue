@@ -10,12 +10,11 @@ from gumo.datastore import datastore_transaction
 from gumo.pullqueue.server.application.repository import GumoPullTaskRepository
 from gumo.pullqueue import PullTask
 from gumo.pullqueue.server.domain import PullTaskWorker
-from gumo.pullqueue.server.domain import LeaseRequest
-from gumo.pullqueue.server.domain import LeaseExtendRequest
-from gumo.pullqueue.server.domain import SuccessRequest
-from gumo.pullqueue.server.domain import FailureRequest
-from gumo.pullqueue.server.domain import LeaseExpired
-
+from gumo.pullqueue.server.domain.event import LeaseRequest
+from gumo.pullqueue.server.domain.event import LeaseExtendRequest
+from gumo.pullqueue.server.domain.event import SuccessRequest
+from gumo.pullqueue.server.domain.event import FailureRequest
+from gumo.pullqueue.server.domain.event import LeaseExpired
 
 logger = getLogger(__name__)
 

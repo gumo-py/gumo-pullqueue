@@ -8,11 +8,11 @@ from gumo.pullqueue.server.domain import PullTaskState
 from gumo.pullqueue.server.domain import PullTaskStatus
 from gumo.pullqueue.server.domain import PullTaskWorker
 from gumo.pullqueue.server.domain import GumoPullTask
-from gumo.pullqueue.server.domain import TaskEvent
-from gumo.pullqueue.server.domain import LeaseRequest
-from gumo.pullqueue.server.domain import LeaseExtendRequest
-from gumo.pullqueue.server.domain import SuccessRequest
-from gumo.pullqueue.server.domain import FailureRequest
+from gumo.pullqueue.server.domain.event import TaskEvent
+from gumo.pullqueue.server.domain.event import LeaseRequest
+from gumo.pullqueue.server.domain.event import LeaseExtendRequest
+from gumo.pullqueue.server.domain.event import SuccessRequest
+from gumo.pullqueue.server.domain.event import FailureRequest
 
 
 class TestPullTask:
