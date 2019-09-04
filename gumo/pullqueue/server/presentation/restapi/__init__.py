@@ -1,5 +1,6 @@
 from logging import getLogger
 import flask.views
+import os
 
 from gumo.core.injector import injector
 from gumo.core import EntityKeyFactory
@@ -12,6 +13,9 @@ from gumo.pullqueue.server.application.lease import FinalizeTaskService
 from gumo.pullqueue.server.application.lease import FailureTaskService
 from gumo.pullqueue.server.application.lease import CheckLeaseExpiredTasksService
 from gumo.pullqueue.server.application.lease import CheckExpiredAndFetchAvailableTasksScenario
+
+from gumo.pullqueue.server.domain.exception import PullQueueError
+
 
 logger = getLogger(__name__)
 pullqueue_blueprint = flask.Blueprint('server', __name__)
@@ -179,6 +183,19 @@ class FailurePullTaskView(flask.views.MethodView):
         return flask.jsonify({
             'task': task.to_json()
         })
+
+
+def pullqueue_error_handler(error: PullQueueError):
+    if os.environ.get('DEBUG'):
+        raise error
+
+    return flask.jsonify({
+        'error_type': str(error.__class__),
+        'error_message': str(error),
+    })
+
+
+pullqueue_blueprint.register_error_handler(PullQueueError, pullqueue_error_handler)
 
 
 pullqueue_blueprint.add_url_rule(

@@ -10,6 +10,9 @@ from gumo.pullqueue.server.domain import PullTaskState
 from gumo.pullqueue.server.domain import PullTaskStatus
 from gumo.pullqueue.server.domain import PullTaskWorker
 
+from gumo.pullqueue.server.domain.exception import AlreadyLeasedError
+from gumo.pullqueue.server.domain.exception import AlreadyDeletedError
+
 
 @dataclasses.dataclass(frozen=True)
 class TaskEvent:
@@ -79,7 +82,10 @@ class LeaseRequest(TaskEvent):
 
     def build_next(self, task: GumoPullTask) -> GumoPullTask:
         if task.state.status == PullTaskStatus.deleted:
-            raise ValueError(f'Target task can not change status, because already deleted.')
+            raise AlreadyDeletedError(f'{task.key.key_literal()} is already deleted.')
+
+        if task.state.status == PullTaskStatus.leased:
+            raise AlreadyLeasedError(f'{task.key.key_literal()} is already leased.')
 
         new_state = task.state.with_status(
             new_status=PullTaskStatus.leased
