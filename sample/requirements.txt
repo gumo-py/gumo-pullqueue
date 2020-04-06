@@ -9,7 +9,7 @@ certifi==2019.3.9         # via requests
 chardet==3.0.4            # via requests
 click==7.0                # via flask
 flasgger==0.9.3           # via gumo-pullqueue
-flask==1.1.1              # via flasgger, gumo-pullqueue
+flask==1.1.2              # via flasgger, gumo-pullqueue
 google-api-core[grpc]==1.9.0  # via google-cloud-core, google-cloud-datastore, google-cloud-storage
 google-api-python-client==1.7.8  # via gumo-core
 google-auth-httplib2==0.0.3  # via google-api-python-client
@@ -22,7 +22,7 @@ googleapis-common-protos==1.5.9  # via google-api-core
 grpcio==1.20.0            # via google-api-core
 gumo-core==0.1.3          # via gumo-datastore, gumo-pullqueue
 gumo-datastore==0.1.0a3   # via gumo-pullqueue
-gumo-pullqueue==0.1.0a2
+gumo-pullqueue==0.1.0a2   # via -r sample/requirements.in
 httplib2==0.12.1          # via google-api-python-client, google-auth-httplib2
 idna==2.8                 # via requests
 injector==0.15.0          # via gumo-core
